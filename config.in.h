@@ -1,8 +1,8 @@
-#ifndef GRID_CONFIG_H
-#define GRID_CONFIG_H
+#ifndef GRIDMGR_CONFIG_H
+#define GRIDMGR_CONFIG_H
 
 /*
-  grid - Organizes windows according to a grid.
+  gridmgr - Organizes windows according to a grid.
   Copyright (C) 2011  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
@@ -21,27 +21,25 @@
 
 #include <stdio.h>
 
-namespace grid {
-	namespace config {
-		static const int
-			VERSION_MAJOR = @grid_VERSION_MAJOR@,
-			VERSION_MINOR = @grid_VERSION_MINOR@,
-			VERSION_PATCH = @grid_VERSION_PATCH@;
+namespace config {
+	static const int
+		VERSION_MAJOR = @gridmgr_VERSION_MAJOR@,
+		VERSION_MINOR = @gridmgr_VERSION_MINOR@,
+		VERSION_PATCH = @gridmgr_VERSION_PATCH@;
 
-		static const char* VERSION_STRING = "@grid_VERSION_MAJOR@.@grid_VERSION_MINOR@.@grid_VERSION_PATCH@";
-		static const char* BUILD_DATE = __TIMESTAMP__;
+	static const char* VERSION_STRING = "@gridmgr_VERSION_MAJOR@.@gridmgr_VERSION_MINOR@.@gridmgr_VERSION_PATCH@";
+	static const char* BUILD_DATE = __TIMESTAMP__;
 
-		extern bool debug_enabled;
-		extern FILE *fout;
-		extern FILE *ferr;
+	extern bool debug_enabled;
+	extern FILE *fout;
+	extern FILE *ferr;
 
-		void debug(const char* format, ...);
-		void debugnn(const char* format, ...);
-		void log(const char* format, ...);
-		void lognn(const char* format, ...);
-		void error(const char* format, ...);
-		void errornn(const char* format, ...);
-	}
+	void debug(const char* format, ...);
+	void debugnn(const char* format, ...);
+	void log(const char* format, ...);
+	void lognn(const char* format, ...);
+	void error(const char* format, ...);
+	void errornn(const char* format, ...);
 }
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  grid - Organizes windows according to a grid.
+  gridmgr - Organizes windows according to a grid.
   Copyright (C) 2011  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
@@ -20,55 +20,53 @@
 
 #include <stdarg.h>
 
-namespace grid {
-	namespace config {
-		FILE *fout = stdout, *ferr = stderr;
-		bool debug_enabled = false;
+namespace config {
+	FILE *fout = stdout, *ferr = stderr;
+	bool debug_enabled = false;
 
-		void debug(const char* format, ...) {
-			if (debug_enabled) {
-				va_list args;
-				va_start(args, format);
-				vfprintf(fout, format, args);
-				va_end(args);
-				fprintf(fout, "\n");
-			}
-		}
-		void debugnn(const char* format, ...) {
-			if (debug_enabled) {
-				va_list args;
-				va_start(args, format);
-				vfprintf(fout, format, args);
-				va_end(args);
-			}
-		}
-
-		void log(const char* format, ...) {
+	void debug(const char* format, ...) {
+		if (debug_enabled) {
 			va_list args;
 			va_start(args, format);
 			vfprintf(fout, format, args);
 			va_end(args);
 			fprintf(fout, "\n");
 		}
-		void lognn(const char* format, ...) {
+	}
+	void debugnn(const char* format, ...) {
+		if (debug_enabled) {
 			va_list args;
 			va_start(args, format);
 			vfprintf(fout, format, args);
 			va_end(args);
 		}
+	}
 
-		void error(const char* format, ...) {
-			va_list args;
-			va_start(args, format);
-			vfprintf(ferr, format, args);
-			va_end(args);
-			fprintf(ferr, "\n");
-		}
-		void errornn(const char* format, ...) {
-			va_list args;
-			va_start(args, format);
-			vfprintf(ferr, format, args);
-			va_end(args);
-		}
+	void log(const char* format, ...) {
+		va_list args;
+		va_start(args, format);
+		vfprintf(fout, format, args);
+		va_end(args);
+		fprintf(fout, "\n");
+	}
+	void lognn(const char* format, ...) {
+		va_list args;
+		va_start(args, format);
+		vfprintf(fout, format, args);
+		va_end(args);
+	}
+
+	void error(const char* format, ...) {
+		va_list args;
+		va_start(args, format);
+		vfprintf(ferr, format, args);
+		va_end(args);
+		fprintf(ferr, "\n");
+	}
+	void errornn(const char* format, ...) {
+		va_list args;
+		va_start(args, format);
+		vfprintf(ferr, format, args);
+		va_end(args);
 	}
 }
