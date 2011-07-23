@@ -1,5 +1,5 @@
 /*
-  grid - Organizes windows according to a grid.
+  gridmgr - Organizes windows according to a grid.
   Copyright (C) 2011  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
@@ -23,8 +23,6 @@
 
 #define MAX_PROPERTY_VALUE_LEN 4096
 #define SOURCE_INDICATION 2 //say that we're a pager or taskbar
-
-using namespace grid;
 
 namespace {
 	unsigned char* get_property(Display *disp, Window win,

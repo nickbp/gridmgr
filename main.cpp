@@ -1,5 +1,5 @@
 /*
-  grid - Organizes windows according to a grid.
+  gridmgr - Organizes windows according to a grid.
   Copyright (C) 2011  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
@@ -23,34 +23,32 @@
 #include "config.h"
 #include "grid.h"
 
-using grid::config::error;
-
 void syntax(char* appname) {
-	error("");
-	error("grid v%s (built %s)",
-		  grid::config::VERSION_STRING,
-		  grid::config::BUILD_DATE);
-	error("Moves/resizes windows to match 2x2/3x3 grid layouts.");
-	error("");
-	error("Usage: %s [options] <position>", appname);
-	error("");
-	error("Positions:");
-	error("  -----------------------------  ");
-	error(" | topleft |  top   | topright | ");
-	error(" | ------- + ------ + -------- | ");
-	error(" |  left   | center |   right  | ");
-	error(" | ------- + ------ + -------- | ");
-	error(" | botleft | bottom | botright | ");
-	error("  -----------------------------  ");
-	error("");
-	error("Options:");
-	error("  -h/--help        This help text.");
-	error("  -v/--verbose     Show verbose output.");
-	error("  --log <file>     Append any output to <file>.");
-	error("");
-	error("Applying the same position to the same window multiple times will");
-	error("automatically resize that window to match different grids. Try it!");
-	error("");
+	config::error("");
+	config::error("gridmgr v%s (built %s)",
+		  config::VERSION_STRING,
+		  config::BUILD_DATE);
+	config::error("Moves/resizes windows to match 2x2/3x3 grid layouts.");
+	config::error("");
+	config::error("Usage: %s [options] <position>", appname);
+	config::error("");
+	config::error("Positions:");
+	config::error("  -----------------------------  ");
+	config::error(" | topleft |  top   | topright | ");
+	config::error(" | ------- + ------ + -------- | ");
+	config::error(" |  left   | center |   right  | ");
+	config::error(" | ------- + ------ + -------- | ");
+	config::error(" | botleft | bottom | botright | ");
+	config::error("  -----------------------------  ");
+	config::error("");
+	config::error("Options:");
+	config::error("  -h/--help        This help text.");
+	config::error("  -v/--verbose     Show verbose output.");
+	config::error("  --log <file>     Append any output to <file>.");
+	config::error("");
+	config::error("Applying the same position to the same window multiple times will");
+	config::error("automatically resize that window to match different grids. Try it!");
+	config::error("");
 }
 
 namespace {
@@ -104,12 +102,12 @@ bool parse_config(int argc, char* argv[]) {
 				} else if (strcmp(arg, "botright") == 0) {
 					position = grid::POS_BOT_RIGHT;
 				} else {
-					error("%s: unknown argument: '%s'", argv[0], argv[i]);
+					config::error("%s: unknown argument: '%s'", argv[0], argv[i]);
 					syntax(argv[0]);
 					return false;
 				}
 				if (run_cmd != CMD_UNKNOWN) {
-					error("%s: misplaced argument: '%s'", argv[0], argv[i]);
+					config::error("%s: misplaced argument: '%s'", argv[0], argv[i]);
 					syntax(argv[0]);
 					return false;
 				}
@@ -123,17 +121,17 @@ bool parse_config(int argc, char* argv[]) {
 			run_cmd = CMD_HELP;
 			return true;
 		case 'v':
-			grid::config::debug_enabled = true;
+			config::debug_enabled = true;
 			break;
 		case 'l':
 			{
 				FILE* logfile = fopen(optarg, "a");
 				if (logfile == NULL) {
-					grid::config::error("Unable to open log file %s: %s", optarg, strerror(errno));
+					config::error("Unable to open log file %s: %s", optarg, strerror(errno));
 					return false;
 				}
-				grid::config::fout = logfile;
-				grid::config::ferr = logfile;
+				config::fout = logfile;
+				config::ferr = logfile;
 			}
 			break;
 		default:
@@ -155,12 +153,12 @@ int main(int argc, char* argv[]) {
 		return 0;
 	case CMD_POSITION:
 		if (position == grid::POS_UNKNOWN) {
-			error("INTERNAL ERROR: position command, but position not set!");
+			config::error("INTERNAL ERROR: position command, but position not set!");
 			return 1;
 		}
 		return grid::set_position(position) ? 0 : 1;
 	default:
-		error("%s: no command specified", argv[0]);
+		config::error("%s: no command specified", argv[0]);
 		syntax(argv[0]);
 		return 1;
 	}

@@ -1,5 +1,5 @@
 /*
-  grid - Organizes windows according to a grid.
+  gridmgr - Organizes windows according to a grid.
   Copyright (C) 2011  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify

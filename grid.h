@@ -1,8 +1,8 @@
-#ifndef GRID_GRID_H
-#define GRID_GRID_H
+#ifndef GRIDMGR_GRID_H
+#define GRIDMGR_GRID_H
 
 /*
-  grid - Organizes windows according to a grid.
+  gridmgr - Organizes windows according to a grid.
   Copyright (C) 2011  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
