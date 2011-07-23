@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 2.6)
 
-project(grid)
+project(gridmgr)
 
-set (grid_VERSION_MAJOR 1)
-set (grid_VERSION_MINOR 0)
-set (grid_VERSION_PATCH 0)
+set (gridmgr_VERSION_MAJOR 1)
+set (gridmgr_VERSION_MINOR 0)
+set (gridmgr_VERSION_PATCH 0)
 
 SET(SRCS
   config.in.h
@@ -15,23 +15,21 @@ SET(SRCS
   window.h
   window.cpp
   )
-
 configure_file (
   "${PROJECT_SOURCE_DIR}/config.in.h"
   "${PROJECT_BINARY_DIR}/config.h"
   )
+
+find_package(X11 REQUIRED)
+
 include_directories("${PROJECT_BINARY_DIR}")
-
-add_executable(grid ${SRCS})
-
-target_link_libraries(grid
-  X11
-  )
+add_executable(gridmgr ${SRCS})
+target_link_libraries(gridmgr X11)
 
 include (InstallRequiredSystemLibraries)
 set (CPACK_RESOURCE_FILE_LICENSE
   "${CMAKE_CURRENT_SOURCE_DIR}/LICENCE.txt")
-set (CPACK_PACKAGE_VERSION_MAJOR "${grid_VERSION_MAJOR}")
-set (CPACK_PACKAGE_VERSION_MINOR "${grid_VERSION_MINOR}")
-set (CPACK_PACKAGE_VERSION_PATCH "${grid_VERSION_PATCH}")
+set (CPACK_PACKAGE_VERSION_MAJOR "${gridmgr_VERSION_MAJOR}")
+set (CPACK_PACKAGE_VERSION_MINOR "${gridmgr_VERSION_MINOR}")
+set (CPACK_PACKAGE_VERSION_PATCH "${gridmgr_VERSION_PATCH}")
 include (CPack)
