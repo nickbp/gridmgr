@@ -23,9 +23,9 @@
 namespace grid {
 	enum MODE {
 		MODE_UNKNOWN,
-		MODE_TWO_COL,//2x2 (not applicable for center col positions)
-		MODE_THREE_COL_S,//3x2 small: each position filling 1 column
-		MODE_THREE_COL_L//3x2 large: sides filling 2 columns and center filling full width
+		MODE_TWO_COL,// 2x2 (not applicable for center col positions)
+		MODE_THREE_COL_S,// 3x2 small: each position filling 1 column
+		MODE_THREE_COL_L// 3x2 large: sides filling 2 columns and center filling full width
 	};
 	inline const char* mode_str(MODE mode) {
 		switch (mode) {
@@ -57,43 +57,43 @@ namespace grid {
 		switch (pos.mode) {
 		case MODE_TWO_COL:
 			switch (pos.pos) {
-			case POS_TOP_LEFT://top left quadrant
+			case POS_TOP_LEFT:// top left quadrant
 				window_out.x = 0;
 				window_out.y = 0;
 				window_out.width = viewport.width / 2.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_TOP_CENTER://invalid, use mode THREE_COL_S/L
+			case POS_TOP_CENTER:// invalid, use mode THREE_COL_S/L
 				return false;
-			case POS_TOP_RIGHT://top right quadrant
+			case POS_TOP_RIGHT:// top right quadrant
 				window_out.x = viewport.width / 2.;
 				window_out.y = 0;
 				window_out.width = viewport.width / 2.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_LEFT://left half
+			case POS_LEFT:// left half
 				window_out.x = 0;
 				window_out.y = 0;
 				window_out.width = viewport.width / 2.;
 				window_out.height = viewport.height;
 				break;
-			case POS_CENTER://invalid, use mode THREE_COL_S/L
+			case POS_CENTER:// invalid, use mode THREE_COL_S/L
 				return false;
-			case POS_RIGHT://right half
+			case POS_RIGHT:// right half
 				window_out.x = viewport.width / 2.;
 				window_out.y = 0;
 				window_out.width = viewport.width / 2.;
 				window_out.height = viewport.height;
 				break;
-			case POS_BOT_LEFT://bottom left quadrant
+			case POS_BOT_LEFT:// bottom left quadrant
 				window_out.x = 0;
 				window_out.y = viewport.height / 2.;
 				window_out.width = viewport.width / 2.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_BOT_CENTER://invalid, use mode THREE_COL_S/L
+			case POS_BOT_CENTER:// invalid, use mode THREE_COL_S/L
 				return false;
-			case POS_BOT_RIGHT://bottom right quadrant
+			case POS_BOT_RIGHT:// bottom right quadrant
 				window_out.x = viewport.width / 2.;
 				window_out.y = viewport.height / 2.;
 				window_out.width = viewport.width / 2.;
@@ -106,55 +106,55 @@ namespace grid {
 			break;
 		case MODE_THREE_COL_S:
 			switch (pos.pos) {
-			case POS_TOP_LEFT://top left col
+			case POS_TOP_LEFT:// top left col
 				window_out.x = 0;
 				window_out.y = 0;
 				window_out.width = viewport.width / 3.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_TOP_CENTER://top center col
+			case POS_TOP_CENTER:// top center col
 				window_out.x = viewport.width / 3.;
 				window_out.y = 0;
 				window_out.width = viewport.width / 3.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_TOP_RIGHT://top right col
+			case POS_TOP_RIGHT:// top right col
 				window_out.x = 2 * viewport.width / 3.;
 				window_out.y = 0;
 				window_out.width = viewport.width / 3.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_LEFT://left third
+			case POS_LEFT:// left third
 				window_out.x = 0;
 				window_out.y = 0;
 				window_out.width = viewport.width / 3.;
 				window_out.height = viewport.height;
 				break;
-			case POS_CENTER://center col
+			case POS_CENTER:// center col
 				window_out.x = viewport.width / 3.;
 				window_out.y = 0;
 				window_out.width = viewport.width / 3.;
 				window_out.height = viewport.height;
 				break;
-			case POS_RIGHT://right third
+			case POS_RIGHT:// right third
 				window_out.x = 2 * viewport.width / 3.;
 				window_out.y = 0;
 				window_out.width = viewport.width / 3;
 				window_out.height = viewport.height;
 				break;
-			case POS_BOT_LEFT://bottom left col
+			case POS_BOT_LEFT:// bottom left col
 				window_out.x = 0;
 				window_out.y = viewport.height / 2.;
 				window_out.width = viewport.width / 3.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_BOT_CENTER://bottom center col
+			case POS_BOT_CENTER:// bottom center col
 				window_out.x = viewport.width / 3.;
 				window_out.y = viewport.height / 2.;
 				window_out.width = viewport.width / 3.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_BOT_RIGHT://bottom right col
+			case POS_BOT_RIGHT:// bottom right col
 				window_out.x = 2 * viewport.width / 3.;
 				window_out.y = viewport.height / 2.;
 				window_out.width = viewport.width / 3.;
@@ -166,55 +166,55 @@ namespace grid {
 			break;
 		case MODE_THREE_COL_L:
 			switch (pos.pos) {
-			case POS_TOP_LEFT://top left two cols
+			case POS_TOP_LEFT:// top left two cols
 				window_out.x = 0;
 				window_out.y = 0;
 				window_out.width = 2 * viewport.width / 3.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_TOP_CENTER://top half
+			case POS_TOP_CENTER:// top half
 				window_out.x = 0;
 				window_out.y = 0;
 				window_out.width = viewport.width;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_TOP_RIGHT://top right two cols
+			case POS_TOP_RIGHT:// top right two cols
 				window_out.x = viewport.width / 3.;
 				window_out.y = 0;
 				window_out.width = 2 * viewport.width / 3.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_LEFT://left two thirds
+			case POS_LEFT:// left two thirds
 				window_out.x = 0;
 				window_out.y = 0;
 				window_out.width = 2 * viewport.width / 3.;
 				window_out.height = viewport.height;
 				break;
-			case POS_CENTER://full screen
+			case POS_CENTER:// full screen
 				window_out.x = 0;
 				window_out.y = 0;
 				window_out.width = viewport.width;
 				window_out.height = viewport.height;
 				break;
-			case POS_RIGHT://right two thirds
+			case POS_RIGHT:// right two thirds
 				window_out.x = viewport.width / 3.;
 				window_out.y = 0;
 				window_out.width = 2 * viewport.width / 3.;
 				window_out.height = viewport.height;
 				break;
-			case POS_BOT_LEFT://bottom left two cols
+			case POS_BOT_LEFT:// bottom left two cols
 				window_out.x = 0;
 				window_out.y = viewport.height / 2.;
 				window_out.width = 2 * viewport.width / 3.;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_BOT_CENTER://bottom half
+			case POS_BOT_CENTER:// bottom half
 				window_out.x = 0;
 				window_out.y = viewport.height / 2.;
 				window_out.width = viewport.width;
 				window_out.height = viewport.height / 2.;
 				break;
-			case POS_BOT_RIGHT://bottom right two cols
+			case POS_BOT_RIGHT:// bottom right two cols
 				window_out.x = viewport.width / 3.;
 				window_out.y = viewport.height / 2.;
 				window_out.width = 2 * viewport.width / 3.;
@@ -238,155 +238,161 @@ namespace grid {
 		return ret;
 	}
 
-	// whether the two numbers are within some threshold of one another,
-	// where the threshold is calculated from the largest number
-	// (eg 990 is 'near' 1000 for a threshold of 1%)
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+	// whether the two numbers are 'near' one another, according to a fudge factor.
 	template <typename A, typename B>
-	inline bool near(A a, B b) {
-		double offset = 0.05 * ((a > b) ? a : b);
-		return (a + offset) >= b && (a - offset) <= b;
+	inline bool _near(A a, B b, const char* a_desc, const char* b_desc) {
+		// fudge factor: the greater of 5px or 5% of the greater number.
+		double fudge = MAX(5, 0.05 * MAX(a,b));
+		bool ret = (a + fudge) >= b && (a - fudge) <= b;
+		config::debug("  %s(%d) vs %s(%d): %s",
+				a_desc, (int)a, b_desc, (int)b,
+				(ret) ? "true" : "false");
+		return ret;
 	}
+#define NEAR(a,b) _near(a, b, #a, #b)
 
-	//given window's dimensions, estimate its position/mode (or unknown+unknown)
-	//(inverse of calculate_pos)
+	// given window's dimensions, estimate its position/mode (or unknown+unknown)
+	// (inverse of calculate_pos)
 	bool get_current_pos(const ActiveWindow::Dimensions& dim,
 			const ActiveWindow::Size& viewport, Position& out) {
+		config::debug("get_current_pos:");
 		out.pos = POS_UNKNOWN;
 		out.mode = MODE_UNKNOWN;
-		if (near(dim.width, viewport.width / 2.)) {
-			if (near(dim.height, viewport.height / 2.)) {
-				if (near(dim.x, 0)) {
-					if (near(dim.y, 0)) {
-						//top left quadrant
+		if (NEAR(dim.width, viewport.width / 2.)) {
+			if (NEAR(dim.height, viewport.height / 2.)) {
+				if (NEAR(dim.x, 0)) {
+					if (NEAR(dim.y, 0)) {
+						// top left quadrant
 						out.pos = POS_TOP_LEFT;
 						out.mode = MODE_TWO_COL;
-					} else if (near(dim.y, viewport.height / 2.)) {
-						//bottom left quadrant
+					} else if (NEAR(dim.y, viewport.height / 2.)) {
+						// bottom left quadrant
 						out.pos = POS_BOT_LEFT;
 						out.mode = MODE_TWO_COL;
 					}
-				} else if (near(dim.x, viewport.width / 2.)) {
-					if (near(dim.y, 0)) {
-						//top right quadrant
+				} else if (NEAR(dim.x, viewport.width / 2.)) {
+					if (NEAR(dim.y, 0)) {
+						// top right quadrant
 						out.pos = POS_TOP_RIGHT;
 						out.mode = MODE_TWO_COL;
-					} else if (near(dim.y, viewport.height / 2.)) {
-						//bottom right quadrant
+					} else if (NEAR(dim.y, viewport.height / 2.)) {
+						// bottom right quadrant
 						out.pos = POS_BOT_RIGHT;
 						out.mode = MODE_TWO_COL;
 					}
 				}
-			} else if (near(dim.height, viewport.height) &&
-					near(dim.y, 0)) {
-				if (near(dim.x, 0)) {
-					//left half
+			} else if (NEAR(dim.height, viewport.height) &&
+					NEAR(dim.y, 0)) {
+				if (NEAR(dim.x, 0)) {
+					// left half
 					out.pos = POS_LEFT;
 					out.mode = MODE_TWO_COL;
-				} else if (near(dim.x, viewport.width / 2.)) {
-					//right half
+				} else if (NEAR(dim.x, viewport.width / 2.)) {
+					// right half
 					out.pos = POS_RIGHT;
 					out.mode = MODE_TWO_COL;
 				}
 			}
-		} else if (near(dim.width, viewport.width / 3.)) {
-			if (near(dim.height, viewport.height / 2.)) {
-				if (near(dim.x, 0)) {
-					if (near(dim.y, 0)) {
-						//top left col
+		} else if (NEAR(dim.width, viewport.width / 3.)) {
+			if (NEAR(dim.height, viewport.height / 2.)) {
+				if (NEAR(dim.x, 0)) {
+					if (NEAR(dim.y, 0)) {
+						// top left col
 						out.pos = POS_TOP_LEFT;
 						out.mode = MODE_THREE_COL_S;
-					} if (near(dim.y, viewport.height / 2.)) {
-						//bottom left col
+					} if (NEAR(dim.y, viewport.height / 2.)) {
+						// bottom left col
 						out.pos = POS_BOT_LEFT;
 						out.mode = MODE_THREE_COL_S;
 					}
-				} else if (near(dim.x, viewport.width / 3.)) {
-					if (near(dim.y, 0)) {
-						//top center col
+				} else if (NEAR(dim.x, viewport.width / 3.)) {
+					if (NEAR(dim.y, 0)) {
+						// top center col
 						out.pos = POS_TOP_CENTER;
 						out.mode = MODE_THREE_COL_S;
-					} else if (near(dim.y, viewport.height / 2.)) {
-						//bottom center col
+					} else if (NEAR(dim.y, viewport.height / 2.)) {
+						// bottom center col
 						out.pos = POS_BOT_CENTER;
 						out.mode = MODE_THREE_COL_S;
 					}
-				} else if (near(dim.x, 2 * viewport.width / 3.)) {
-					if (near(dim.y, 0)) {
-						//top right col
+				} else if (NEAR(dim.x, 2 * viewport.width / 3.)) {
+					if (NEAR(dim.y, 0)) {
+						// top right col
 						out.pos = POS_TOP_RIGHT;
 						out.mode = MODE_THREE_COL_S;
-					} else if (near(dim.y, viewport.height / 2.)) {
-						//bottom right col
+					} else if (NEAR(dim.y, viewport.height / 2.)) {
+						// bottom right col
 						out.pos = POS_BOT_RIGHT;
 						out.mode = MODE_THREE_COL_S;
 					}
 				}
-			} else if (near(dim.height, viewport.height) &&
-					near(dim.y, 0)) {
-				if (near(dim.x, 0)) {
-					//left col
+			} else if (NEAR(dim.height, viewport.height) &&
+					NEAR(dim.y, 0)) {
+				if (NEAR(dim.x, 0)) {
+					// left col
 					out.pos = POS_LEFT;
 					out.mode = MODE_THREE_COL_S;
-				} else if (near(dim.x, viewport.width / 3.)) {
-					//center col
+				} else if (NEAR(dim.x, viewport.width / 3.)) {
+					// center col
 					out.pos = POS_CENTER;
 					out.mode = MODE_THREE_COL_S;
-				} else if (near(dim.x, 2 * viewport.width / 3.)) {
-					//right col
+				} else if (NEAR(dim.x, 2 * viewport.width / 3.)) {
+					// right col
 					out.pos = POS_RIGHT;
 					out.mode = MODE_THREE_COL_S;
 				}
 			}
-		} else if (near(dim.width, 2 * viewport.width / 3.)) {
-			if (near(dim.height, viewport.height / 2.)) {
-				if (near(dim.x, 0)) {
-					if (near(dim.y, 0)) {
-						//top left two cols
+		} else if (NEAR(dim.width, 2 * viewport.width / 3.)) {
+			if (NEAR(dim.height, viewport.height / 2.)) {
+				if (NEAR(dim.x, 0)) {
+					if (NEAR(dim.y, 0)) {
+						// top left two cols
 						out.pos = POS_TOP_LEFT;
 						out.mode = MODE_THREE_COL_L;
-					} else if (near(dim.y, viewport.height / 2.)) {
-						//bottom left two cols
+					} else if (NEAR(dim.y, viewport.height / 2.)) {
+						// bottom left two cols
 						out.pos = POS_BOT_LEFT;
 						out.mode = MODE_THREE_COL_L;
 					}
-				} else if (near(dim.x, viewport.width / 3.)) {
-					if (near(dim.y, 0)) {
-						//top right two cols
+				} else if (NEAR(dim.x, viewport.width / 3.)) {
+					if (NEAR(dim.y, 0)) {
+						// top right two cols
 						out.pos = POS_TOP_RIGHT;
 						out.mode = MODE_THREE_COL_L;
-					} else if (near(dim.y, viewport.height / 2.)) {
-						//bottom right two cols
+					} else if (NEAR(dim.y, viewport.height / 2.)) {
+						// bottom right two cols
 						out.pos = POS_BOT_RIGHT;
 						out.mode = MODE_THREE_COL_L;
 					}
 				}
-			} else if (near(dim.height, viewport.height) &&
-					near(dim.y, 0)) {
-				if (near(dim.x, 0)) {
-					//left two cols
+			} else if (NEAR(dim.height, viewport.height) &&
+					NEAR(dim.y, 0)) {
+				if (NEAR(dim.x, 0)) {
+					// left two cols
 					out.pos = POS_LEFT;
 					out.mode = MODE_THREE_COL_L;
-				} else if (near(dim.x, viewport.width / 3.)) {
-					//right two cols
+				} else if (NEAR(dim.x, viewport.width / 3.)) {
+					// right two cols
 					out.pos = POS_RIGHT;
 					out.mode = MODE_THREE_COL_L;
 				}
 			}
-		} else if (near(dim.width, viewport.width) &&
-				near(dim.x, 0)) {
-			if (near(dim.height, viewport.height / 2.)) {
-				if (near(dim.y, 0)) {
-					//top half
+		} else if (NEAR(dim.width, viewport.width) &&
+				NEAR(dim.x, 0)) {
+			if (NEAR(dim.height, viewport.height / 2.)) {
+				if (NEAR(dim.y, 0)) {
+					// top half
 					out.pos = POS_TOP_CENTER;
 					out.mode = MODE_THREE_COL_L;
-				} else if (near(dim.y, viewport.height / 2.)) {
-					//bottom half
+				} else if (NEAR(dim.y, viewport.height / 2.)) {
+					// bottom half
 					out.pos = POS_BOT_CENTER;
 					out.mode = MODE_THREE_COL_L;
 				}
-			} else if (near(dim.height, viewport.height) &&
-					near(dim.y, 0)) {
-				//full screen
+			} else if (NEAR(dim.height, viewport.height) &&
+					NEAR(dim.y, 0)) {
+				// full screen
 				out.pos = POS_CENTER;
 				out.mode = MODE_THREE_COL_L;
 			}
@@ -400,16 +406,16 @@ namespace grid {
 
 	bool get_next_pos(const Position& cur, POS req_pos, Position& out) {
 		if (req_pos == POS_UNKNOWN) {
-			return false;//nice to have
+			return false;// nice to have
 		}
 		if (cur.pos == req_pos) {
-			//position is same, so rotate mode
+			// position is same, so rotate mode
 			out.pos = cur.pos;
 			switch (cur.pos) {
 			case POS_TOP_CENTER:
 			case POS_CENTER:
 			case POS_BOT_CENTER:
-				//for center col: 3x2L -> 3x2S (-> 3x2L) (no 2x2)
+				// for center col: 3x2L -> 3x2S (-> 3x2L) (no 2x2)
 				switch (cur.mode) {
 				case MODE_THREE_COL_L:
 					out.mode = MODE_THREE_COL_S;
@@ -420,7 +426,7 @@ namespace grid {
 				}
 				break;
 			default:
-				//for everything else: 2x2 -> 3x2L -> 3x2S (-> 2x2)
+				// for everything else: 2x2 -> 3x2L -> 3x2S (-> 2x2)
 				switch (cur.mode) {
 				case MODE_UNKNOWN:
 				case MODE_THREE_COL_L:
@@ -435,17 +441,17 @@ namespace grid {
 				}
 			}
 		} else {
-			//new position, so start with initial mode
+			// new position, so start with initial mode
 			out.pos = req_pos;
 			switch (req_pos) {
 			case POS_TOP_CENTER:
 			case POS_CENTER:
 			case POS_BOT_CENTER:
-				//for center col: start with 3x2L
+				// for center col: start with 3x2L
 				out.mode = MODE_THREE_COL_L;
 				break;
 			default:
-				//for everything else: start with 2x2
+				// for everything else: start with 2x2
 				out.mode = MODE_TWO_COL;
 			}
 		}
@@ -462,8 +468,8 @@ bool grid::set_position(POS req_pos) {
 	ActiveWindow::Size viewport;
 	ActiveWindow::Dimensions cur_dim, next_dim;
 	return win.Sizes(viewport, cur_dim) &&
-		get_current_pos(cur_dim, viewport, cur_pos) &&//cur_dim+viewport -> cur_pos
-		get_next_pos(cur_pos, req_pos, next_pos) &&//cur_pos+req_pos -> next_pos
-		calculate_pos(viewport, next_pos, next_dim) &&//next_pos+viewport -> next_dim
+		get_current_pos(cur_dim, viewport, cur_pos) &&// cur_dim+viewport -> cur_pos
+		get_next_pos(cur_pos, req_pos, next_pos) &&// cur_pos+req_pos -> next_pos
+		calculate_pos(viewport, next_pos, next_dim) &&// next_pos+viewport -> next_dim
 		win.MoveResize(next_dim);
 }

@@ -117,7 +117,7 @@ namespace {
 									XA_CARDINAL, "_NET_FRAME_EXTENTS", &count))) {
 				//apparently fails with eg chrome, so just assume 0 and move on
 				//(yet chrome oddly works fine with unmaximize_unshade_window())
-				config::debug("get frame extents failed, assuming extents = 0");
+				config::debug("get_window_size: get frame extents failed, assuming extents = 0");
 				margin_width = margin_height = 0;
 			} else {
 				if (count != 4) {
@@ -127,7 +127,7 @@ namespace {
 				}
 				margin_width = widths[0] + widths[1];//left, right
 				margin_height = widths[2] + widths[3];//top, bottom
-				config::debug("extents: width%u height%u",
+				config::debug("get_window_size: extents: width%u height%u",
 						margin_width, margin_height);
 				free_property(widths);
 			}
@@ -160,7 +160,7 @@ namespace {
 			//only use XGetGeo margins when calculating exterior position:
 			exterior_x = interior_x - margin_left_tmp - border;
 			exterior_y = interior_y - margin_top_tmp - border;
-			config::debug("pos: interior %ldx %ldy - geomargins %dw %dh %ldb = exterior %ldx %ldy",
+			config::debug("get_window_size: pos: interior %ldx %ldy - geomargins %dw %dh %ldb = exterior %ldx %ldy",
 					interior_x, interior_y,
 					margin_left_tmp, margin_top_tmp, border,
 					exterior_x, exterior_y);
@@ -184,7 +184,7 @@ namespace {
 			*out_margin_height = margin_height;
 		}
 
-		config::debug("size: interior %luw %luh + summargins %dw %dh = %uw %uh",
+		config::debug("get_window_size: size: interior %luw %luh + summargins %dw %dh = %uw %uh",
 				interior_width, interior_height, margin_width, margin_height,
 				interior_width + margin_width, interior_height + margin_height);
 
@@ -201,7 +201,7 @@ namespace {
 						XInternAtom(disp, "_NET_WM_STATE_SHADED", False),
 						XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False),
 						SOURCE_INDICATION, 0)) {
-			config::error("couldnt unshade/defullscreen");
+			config::error("defullscreen_deshade_window: couldnt unshade/defullscreen");
 			return false;
 		}
 		return true;
@@ -217,7 +217,7 @@ namespace {
 						XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_VERT", False),
 						XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_HORZ", False),
 						SOURCE_INDICATION, 0)) {
-			config::error("couldnt demaximize");
+			config::error("demaximize_window: couldnt demaximize");
 			return false;
 		}
 
@@ -247,7 +247,7 @@ namespace {
 			return false;
 		}
 		if (count == 0) {
-			config::error("Unable to retrieve viewport area.");
+			config::error("get_viewport: Unable to retrieve viewport area.");
 			free_property(area);
 			return false;
 		}
@@ -283,19 +283,19 @@ namespace {
 ActiveWindow::ActiveWindow() {
 	disp = XOpenDisplay(NULL);
 	if (disp == NULL) {
-		config::error("unable to get display");
+		config::error("activewindow init: unable to get display");
 		return;
 	}
 
 	if (!get_viewport(disp, _viewport)) {
-		config::error("unable to get viewport dimensions");
+		config::error("activewindow init: unable to get viewport dimensions");
 		return;
 	}
 
 	win = (Window*)get_property(disp, DefaultRootWindow(disp),
 			XA_WINDOW, "_NET_ACTIVE_WINDOW", NULL);
 	if (win == NULL) {
-		config::error("unable to get active window");
+		config::error("activewindow init: unable to get active window");
 	}
 }
 
@@ -323,7 +323,7 @@ bool ActiveWindow::Sizes(Size& viewport, Dimensions& activewin) const {
 		Atom* states = (Atom*)get_property(disp, *win,
 				XA_ATOM, "_NET_WM_STATE", &count);
 		if (states == NULL) {
-			config::error("couldnt get states");
+			config::error("couldnt get window states");
 		} else {
 			for (size_t i = 0; i < count; ++i) {
 				config::log("state %lu: %d %s",
