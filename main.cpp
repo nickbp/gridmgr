@@ -28,7 +28,7 @@ void syntax(char* appname) {
 	config::error("gridmgr v%s (built %s)",
 		  config::VERSION_STRING,
 		  config::BUILD_DATE);
-	config::error("Moves/resizes windows to match 2x2/3x3 grid layouts.");
+	config::error("Moves/sizes windows to match 2x2/3x2 grid layouts.");
 	config::error("");
 	config::error("Usage: %s [options] <position>", appname);
 	config::error("");
@@ -45,9 +45,6 @@ void syntax(char* appname) {
 	config::error("  -h/--help        This help text.");
 	config::error("  -v/--verbose     Show verbose output.");
 	config::error("  --log <file>     Append any output to <file>.");
-	config::error("");
-	config::error("Applying the same position to the same window multiple times will");
-	config::error("automatically resize that window to match different grids. Try it!");
 	config::error("");
 }
 
@@ -72,8 +69,8 @@ bool parse_config(int argc, char* argv[]) {
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, argv, "hv",
-						long_options, &option_index);
+		c = getopt_long(argc, argv, "hvl",
+				long_options, &option_index);
 		if (c == -1) {//unknown arg (doesnt match -x/--x format)
 			if (optind >= argc) {
 				//at end of successful parse
