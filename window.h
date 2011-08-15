@@ -22,9 +22,9 @@
 #include <X11/Xlib.h>
 
 /*
-  NOTE: This class internally assumes that the window/viewport aren't altered
-  throughout the lifetime of the constructed object. Any alterations
-  will NOT be automatically detected!
+  NOTE: This class internally assumes that a new active window won't be
+  selected for the lifetime of the constructed object. Any changes in
+  active windows will NOT be automatically detected!
 */
 
 class ActiveWindow {
@@ -32,26 +32,21 @@ class ActiveWindow {
 	ActiveWindow();
 	virtual ~ActiveWindow();
 
-	struct Size {
-		unsigned long width;
-		unsigned long height;
-	};
 	struct Dimensions {
-		//x,y are relative to the viewport
+		//relative to the top left corner of the screen
 		long x;
 		long y;
-		//width,height include any borders/decorations
+		//width,height include any applicable borders/decorations ('exterior' size)
 		unsigned long width;
 		unsigned long height;
 	};
 
-	bool Sizes(Size& viewport, Dimensions& activewin) const;
+	bool Sizes(Dimensions& viewport, Dimensions& activewin) const;
 	bool MoveResize(const Dimensions& activewin);
 
  private:
 	Display* disp;
 	Window* win;
-	Dimensions _viewport;
 };
 
 #endif

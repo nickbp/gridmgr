@@ -24,28 +24,28 @@
 #include "grid.h"
 
 void syntax(char* appname) {
-	config::error("");
-	config::error("gridmgr v%s (built %s)",
+	ERROR_RAWDIR("");
+	ERROR_RAWDIR("gridmgr v%s (built %s)",
 		  config::VERSION_STRING,
 		  config::BUILD_DATE);
-	config::error("Moves/sizes windows to match 2x2/3x2 grid layouts.");
-	config::error("");
-	config::error("Usage: %s [options] <position>", appname);
-	config::error("");
-	config::error("Positions:");
-	config::error("  -----------------------------  ");
-	config::error(" | topleft |  top   | topright | ");
-	config::error(" | ------- + ------ + -------- | ");
-	config::error(" |  left   | center |   right  | ");
-	config::error(" | ------- + ------ + -------- | ");
-	config::error(" | botleft | bottom | botright | ");
-	config::error("  -----------------------------  ");
-	config::error("");
-	config::error("Options:");
-	config::error("  -h/--help        This help text.");
-	config::error("  -v/--verbose     Show verbose output.");
-	config::error("  --log <file>     Append any output to <file>.");
-	config::error("");
+	ERROR_RAWDIR("Moves/sizes windows to match 2x2/3x2 grid layouts.");
+	ERROR_RAWDIR("");
+	ERROR_RAWDIR("Usage: %s [options] <position>", appname);
+	ERROR_RAWDIR("");
+	ERROR_RAWDIR("Positions:");
+	ERROR_RAWDIR("  -----------------------------  ");
+	ERROR_RAWDIR(" | topleft |  top   | topright | ");
+	ERROR_RAWDIR(" | ------- + ------ + -------- | ");
+	ERROR_RAWDIR(" |  left   | center |   right  | ");
+	ERROR_RAWDIR(" | ------- + ------ + -------- | ");
+	ERROR_RAWDIR(" | botleft | bottom | botright | ");
+	ERROR_RAWDIR("  -----------------------------  ");
+	ERROR_RAWDIR("");
+	ERROR_RAWDIR("Options:");
+	ERROR_RAWDIR("  -h/--help        This help text.");
+	ERROR_RAWDIR("  -v/--verbose     Show verbose output.");
+	ERROR_RAWDIR("  --log <file>     Append any output to <file>.");
+	ERROR_RAWDIR("");
 }
 
 namespace {
@@ -99,12 +99,12 @@ bool parse_config(int argc, char* argv[]) {
 				} else if (strcmp(arg, "botright") == 0) {
 					position = grid::POS_BOT_RIGHT;
 				} else {
-					config::error("%s: unknown argument: '%s'", argv[0], argv[i]);
+					ERROR("%s: unknown argument: '%s'", argv[0], argv[i]);
 					syntax(argv[0]);
 					return false;
 				}
 				if (run_cmd != CMD_UNKNOWN) {
-					config::error("%s: misplaced argument: '%s'", argv[0], argv[i]);
+					ERROR("%s: misplaced argument: '%s'", argv[0], argv[i]);
 					syntax(argv[0]);
 					return false;
 				}
@@ -124,7 +124,7 @@ bool parse_config(int argc, char* argv[]) {
 			{
 				FILE* logfile = fopen(optarg, "a");
 				if (logfile == NULL) {
-					config::error("Unable to open log file %s: %s", optarg, strerror(errno));
+					ERROR("Unable to open log file %s: %s", optarg, strerror(errno));
 					return false;
 				}
 				config::fout = logfile;
@@ -150,12 +150,12 @@ int main(int argc, char* argv[]) {
 		return 0;
 	case CMD_POSITION:
 		if (position == grid::POS_UNKNOWN) {
-			config::error("INTERNAL ERROR: position command, but position not set!");
+			ERROR_DIR("INTERNAL ERROR: position command, but position not set!");
 			return 1;
 		}
 		return grid::set_position(position) ? 0 : 1;
 	default:
-		config::error("%s: no command specified", argv[0]);
+		ERROR("%s: no command specified", argv[0]);
 		syntax(argv[0]);
 		return 1;
 	}

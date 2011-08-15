@@ -21,6 +21,31 @@
 
 #include <stdio.h>
 
+#define _PRINT_PREFIX "%s %s  "
+#define _PRINT_ARGS __FUNCTION__
+
+/* Some simple print helpers */
+
+/* Format str and file/line prefix */
+#define DEBUG(format, ...) config::_debug(_PRINT_PREFIX format, "DEBUG", _PRINT_ARGS, __VA_ARGS__)
+#define LOG(format, ...) config::_log(_PRINT_PREFIX format, "LOG", _PRINT_ARGS, __VA_ARGS__)
+#define ERROR(format, ...) config::_error(_PRINT_PREFIX format, "ERR", _PRINT_ARGS, __VA_ARGS__)
+
+/* No file/line prefix ("RAW") */
+#define DEBUG_RAW(format, ...) config::_debug(format, __VA_ARGS__)
+#define LOG_RAW(format, ...) config::_log(format, __VA_ARGS__)
+#define ERROR_RAW(format, ...) config::_error(format, __VA_ARGS__)
+
+/* No format str ("Direct" -> "DIR") */
+#define DEBUG_DIR(...) config::_debug(_PRINT_PREFIX "%s", "DEBUG", _PRINT_ARGS, __VA_ARGS__)
+#define LOG_DIR(...) config::_log(_PRINT_PREFIX "%s", "LOG", _PRINT_ARGS, __VA_ARGS__)
+#define ERROR_DIR(...) config::_error(_PRINT_PREFIX "%s", "ERR", _PRINT_ARGS, __VA_ARGS__)
+
+/* No format str and no file/line prefix */
+#define DEBUG_RAWDIR(...) config::_debug(__VA_ARGS__)
+#define LOG_RAWDIR(...) config::_log(__VA_ARGS__)
+#define ERROR_RAWDIR(...) config::_error(__VA_ARGS__)
+
 namespace config {
 	static const int
 		VERSION_MAJOR = @gridmgr_VERSION_MAJOR@,
@@ -34,12 +59,10 @@ namespace config {
 	extern FILE *fout;
 	extern FILE *ferr;
 
-	void debug(const char* format, ...);
-	void debugnn(const char* format, ...);
-	void log(const char* format, ...);
-	void lognn(const char* format, ...);
-	void error(const char* format, ...);
-	void errornn(const char* format, ...);
+	/* DONT USE THESE, use DEBUG()/LOG()/ERROR() instead. */
+	void _debug(const char* format, ...);
+	void _log(const char* format, ...);
+	void _error(const char* format, ...);
 }
 
 #endif

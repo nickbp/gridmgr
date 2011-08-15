@@ -24,7 +24,7 @@ namespace config {
 	FILE *fout = stdout, *ferr = stderr;
 	bool debug_enabled = false;
 
-	void debug(const char* format, ...) {
+	void _debug(const char* format, ...) {
 		if (debug_enabled) {
 			va_list args;
 			va_start(args, format);
@@ -33,40 +33,20 @@ namespace config {
 			fprintf(fout, "\n");
 		}
 	}
-	void debugnn(const char* format, ...) {
-		if (debug_enabled) {
-			va_list args;
-			va_start(args, format);
-			vfprintf(fout, format, args);
-			va_end(args);
-		}
-	}
 
-	void log(const char* format, ...) {
+	void _log(const char* format, ...) {
 		va_list args;
 		va_start(args, format);
 		vfprintf(fout, format, args);
 		va_end(args);
 		fprintf(fout, "\n");
 	}
-	void lognn(const char* format, ...) {
-		va_list args;
-		va_start(args, format);
-		vfprintf(fout, format, args);
-		va_end(args);
-	}
 
-	void error(const char* format, ...) {
+	void _error(const char* format, ...) {
 		va_list args;
 		va_start(args, format);
 		vfprintf(ferr, format, args);
 		va_end(args);
 		fprintf(ferr, "\n");
-	}
-	void errornn(const char* format, ...) {
-		va_list args;
-		va_start(args, format);
-		vfprintf(ferr, format, args);
-		va_end(args);
 	}
 }

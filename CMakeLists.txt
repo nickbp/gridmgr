@@ -22,9 +22,11 @@ configure_file (
 
 find_package(X11 REQUIRED)
 
-include_directories("${PROJECT_BINARY_DIR}" "${X11_X11_INCLUDE_PATH}")
+include_directories("${PROJECT_BINARY_DIR}"
+  "${X11_X11_INCLUDE_PATH}" "${X11_Xinerama_INCLUDE_PATH}")
 add_executable(gridmgr ${SRCS})
-target_link_libraries(gridmgr "${X11_X11_LIB}")
+target_link_libraries(gridmgr
+  "${X11_X11_LIB}" "${X11_Xinerama_LIB}")
 
 include (InstallRequiredSystemLibraries)
 set (CPACK_RESOURCE_FILE_LICENSE
