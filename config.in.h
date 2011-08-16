@@ -46,6 +46,8 @@
 #define LOG_RAWDIR(...) config::_log(__VA_ARGS__)
 #define ERROR_RAWDIR(...) config::_error(__VA_ARGS__)
 
+#cmakedefine USE_XINERAMA
+
 namespace config {
 	static const int
 		VERSION_MAJOR = @gridmgr_VERSION_MAJOR@,
