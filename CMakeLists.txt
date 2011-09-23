@@ -17,6 +17,11 @@ set (gridmgr_VERSION_MAJOR 1)
 set (gridmgr_VERSION_MINOR 0)
 set (gridmgr_VERSION_PATCH 0)
 
+# Enable c++0x and more warnings
+if(CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS "-std=c++0x -Wall")
+endif()
+
 SET(SRCS
   config.in.h
   config.cpp

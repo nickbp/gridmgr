@@ -137,13 +137,13 @@ bool viewport::get_viewport_xinerama(Display* disp,
 		//check whether the strut is within the active screen,
 		//then update/shrink the active screen's viewport if it is.
 		if (strut[0] > 0 && INTERSECTION(active_y1, active_y2, strut[4], strut[5]) != 0) {//left
-			viewport_out.x = MAX(viewport_out.x, strut[0] - bound_x1);
+			viewport_out.x = MAX(viewport_out.x, (long)strut[0] - bound_x1);
 		}
 		if (strut[1] > 0 && INTERSECTION(active_y1, active_y2, strut[6], strut[7]) != 0) {//right
 			viewport_out.width = MIN(viewport_out.width, bound_x2 - strut[1] - viewport_out.x);
 		}
 		if (strut[2] > 0 && INTERSECTION(active_x1, active_x2, strut[8], strut[9]) != 0) {//top
-			viewport_out.y = MAX(viewport_out.y, strut[2] - bound_y1);
+			viewport_out.y = MAX(viewport_out.y, (long)strut[2] - bound_y1);
 		}
 		if (strut[3] > 0 && INTERSECTION(active_x1, active_x2, strut[10], strut[11]) != 0) {//bot
 			viewport_out.height = MIN(viewport_out.height, bound_y2 - strut[3] - viewport_out.y);

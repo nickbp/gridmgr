@@ -54,8 +54,8 @@ namespace config {
 		VERSION_MINOR = @gridmgr_VERSION_MINOR@,
 		VERSION_PATCH = @gridmgr_VERSION_PATCH@;
 
-	static const char* VERSION_STRING = "@gridmgr_VERSION_MAJOR@.@gridmgr_VERSION_MINOR@.@gridmgr_VERSION_PATCH@";
-	static const char* BUILD_DATE = __TIMESTAMP__;
+	static const char VERSION_STRING[] = "@gridmgr_VERSION_MAJOR@.@gridmgr_VERSION_MINOR@.@gridmgr_VERSION_PATCH@";
+	static const char BUILD_DATE[] = __TIMESTAMP__;
 
 	extern bool debug_enabled;
 	extern FILE *fout;
