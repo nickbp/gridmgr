@@ -66,7 +66,7 @@ target_link_libraries(gridmgr ${LIBS})
 
 include (InstallRequiredSystemLibraries)
 set (CPACK_RESOURCE_FILE_LICENSE
-  "${CMAKE_CURRENT_SOURCE_DIR}/LICENCE.txt")
+  "${CMAKE_CURRENT_SOURCE_DIR}/../LICENCE")
 set (CPACK_PACKAGE_VERSION_MAJOR "${gridmgr_VERSION_MAJOR}")
 set (CPACK_PACKAGE_VERSION_MINOR "${gridmgr_VERSION_MINOR}")
 set (CPACK_PACKAGE_VERSION_PATCH "${gridmgr_VERSION_PATCH}")

@@ -1,0 +1,7 @@
+Building gridmgr:
+
+1) Install libx11-dev, and optionally libxinerama-dev
+2) "mkdir build; cd build"
+3) "cmake ../src"
+4) "make"
+5) See "build/gridmgr"
