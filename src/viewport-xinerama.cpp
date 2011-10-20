@@ -43,8 +43,8 @@ bool viewport::get_viewport_xinerama(Display* disp,
 		ActiveWindow::Dimensions& viewport_out) {
 	//pick the xinerama screen which the active window 'belongs' to (= 'active screen')
 	//also calculate a bounding box across all screens (needed for strut math)
-	long bound_x1 = 0, bound_x2 = 0, bound_y1 = 0, bound_y2 = 0,//bounding box of all screens
-		active_x1 = 0, active_x2 = 0, active_y1 = 0, active_y2 = 0;//copy of the active screen
+	long bound_xmin = 0, bound_xmax = 0, bound_ymin = 0, bound_ymax = 0,//bounding box of all screens
+		active_xmin = 0, active_xmax = 0, active_ymin = 0, active_ymax = 0;//copy of the active screen
 	{
 		int screen_count = 0;
 		XineramaScreenInfo* screens = XineramaQueryScreens(disp, &screen_count);
@@ -56,10 +56,10 @@ bool viewport::get_viewport_xinerama(Display* disp,
 			return false;
 		} else {
 			//initialize bounding box to something
-			bound_x1 = screens[0].x_org;
-			bound_x2 = screens[0].x_org + screens[0].width;
-			bound_y1 = screens[0].y_org;
-			bound_y2 = screens[0].y_org + screens[0].height;
+			bound_xmin = screens[0].x_org;
+			bound_xmax = screens[0].x_org + screens[0].width;
+			bound_ymin = screens[0].y_org;
+			bound_ymax = screens[0].y_org + screens[0].height;
 
 			//search for largest overlap between active window and xinerama screen.
 			//the screen with the most overlap is the 'active screen'
@@ -69,10 +69,10 @@ bool viewport::get_viewport_xinerama(Display* disp,
 				XineramaScreenInfo& screen = screens[i];
 
 				//grow bounding box
-				bound_x1 = MIN(bound_x1, screen.x_org);
-				bound_x2 = MAX(bound_x2, screen.x_org + screen.width);
-				bound_y1 = MIN(bound_y1, screen.y_org);
-				bound_y2 = MAX(bound_y2, screen.y_org + screen.height);
+				bound_xmin = MIN(bound_xmin, screen.x_org);
+				bound_xmax = MAX(bound_xmax, screen.x_org + screen.width);
+				bound_ymin = MIN(bound_ymin, screen.y_org);
+				bound_ymax = MAX(bound_ymax, screen.y_org + screen.height);
 
 				//check overlap, update counters if this overlap is bigger
 				int overlap =
@@ -86,28 +86,32 @@ bool viewport::get_viewport_xinerama(Display* disp,
 						screens[i].x_org, screens[i].y_org,
 						screens[i].width, screens[i].height);
 
-				if (active_overlap < overlap) {
+				if (overlap > active_overlap) {
 					active_overlap = overlap;
 					active_i = i;
 				}
 			}
 
-			viewport_out.x = screens[active_i].x_org;
-			viewport_out.y = screens[active_i].y_org;
-			viewport_out.width = screens[active_i].width;
-			viewport_out.height = screens[active_i].height;
-			active_x1 = viewport_out.x;
-			active_x2 = viewport_out.x + viewport_out.width;
-			active_y1 = viewport_out.y;
-			active_y2 = viewport_out.y + viewport_out.height;
+			//set active screen's dimensions
+			active_xmin = screens[active_i].x_org;
+			active_xmax = active_xmin + screens[active_i].width;
+			active_ymin = screens[active_i].y_org;
+			active_ymax = active_ymin + screens[active_i].height;
 		}
 		XFree(screens);
 	}
-	DEBUG("screen bounding box: %ld-%ldx %ld-%ldy",
-			bound_x1, bound_x2, bound_y1, bound_y2);
+	DEBUG("desktop bounding box: %ld-%ldx %ld-%ldy",
+			bound_xmin, bound_xmax, bound_ymin, bound_ymax);
+	DEBUG("active screen: %ld-%ldx %ld-%ldy",
+			active_xmin, active_xmax, active_ymin, active_ymax);
 
 	//now that we've got the active screen and the bounding box,
 	//iterate over all struts, shrinking the active screen's viewport as necessary
+
+	//make copy of active_*, operate on things in terms of min/max until the end
+	long viewport_xmin = active_xmin, viewport_xmax = active_xmax,
+		viewport_ymin = active_ymin, viewport_ymax = active_ymax;
+
 	size_t client_count = 0;
 	Window* clients;
 	if (!(clients = (Window*)x11_util::get_property(disp, DefaultRootWindow(disp),
@@ -128,28 +132,48 @@ bool viewport::get_viewport_xinerama(Display* disp,
 			x11_util::free_property(strut);
 			return false;
 		}
-		DEBUG("client %lu of %lu struts: left:%lux%lu-%lu right:%lux%lu-%lu top:%lux%lu-%lu bot:%lux%lu-%lu",
+		DEBUG("client %lu of %lu struts: left:%lu@%lu-%lu right:%lu@%lu-%lu top:%lu@%lu-%lu bot:%lu@%lu-%lu",
 				i+1, client_count,
 				strut[0], strut[4], strut[5],
 				strut[1], strut[6], strut[7],
 				strut[2], strut[8], strut[9],
 				strut[3], strut[10], strut[11]);
-		//check whether the strut is within the active screen,
-		//then update/shrink the active screen's viewport if it is.
-		if (strut[0] > 0 && INTERSECTION(active_y1, active_y2, strut[4], strut[5]) != 0) {//left
-			viewport_out.x = MAX(viewport_out.x, (long)strut[0] - bound_x1);
+		//check whether the strut (which is given relative to the bounding box) is within
+		//the active screen, then update/shrink the active screen's viewport if it is.
+
+		//strut x = 1010
+		//bound x = 5
+		//viewport x = 1005
+
+		//left strut: first check if it intersects our screen's min/max y
+		if (strut[0] > 0 && INTERSECTION(active_ymin, active_ymax, strut[4], strut[5]) != 0) {
+			//then check if the strut (relative to the bounding box) actually exceeds our min x
+			viewport_xmin = MAX(viewport_xmin, (long)strut[0] - bound_xmin);
 		}
-		if (strut[1] > 0 && INTERSECTION(active_y1, active_y2, strut[6], strut[7]) != 0) {//right
-			viewport_out.width = MIN(viewport_out.width, bound_x2 - strut[1] - viewport_out.x);
+		//right strut
+		if (strut[1] > 0 && INTERSECTION(active_ymin, active_ymax, strut[6], strut[7]) != 0) {
+			viewport_xmax = MIN(viewport_xmax, bound_xmax - strut[1]);
 		}
-		if (strut[2] > 0 && INTERSECTION(active_x1, active_x2, strut[8], strut[9]) != 0) {//top
-			viewport_out.y = MAX(viewport_out.y, (long)strut[2] - bound_y1);
+		//top strut
+		if (strut[2] > 0 && INTERSECTION(active_xmin, active_xmax, strut[8], strut[9]) != 0) {
+			viewport_ymin = MAX(viewport_ymin, (long)strut[2] - bound_ymin);
 		}
-		if (strut[3] > 0 && INTERSECTION(active_x1, active_x2, strut[10], strut[11]) != 0) {//bot
-			viewport_out.height = MIN(viewport_out.height, bound_y2 - strut[3] - viewport_out.y);
+		//bottom strut
+		if (strut[3] > 0 && INTERSECTION(active_xmin, active_xmax, strut[10], strut[11]) != 0) {
+			viewport_ymax = MIN(viewport_ymax, bound_ymax - strut[3]);
 		}
 		x11_util::free_property(strut);
 	}
 	x11_util::free_property(clients);
+
+	viewport_out.x = viewport_xmin;
+	viewport_out.y = viewport_ymin;
+	viewport_out.width = viewport_xmax - viewport_xmin;
+	viewport_out.height = viewport_ymax - viewport_ymin;
+
+	DEBUG("trimmed active screen: %ld-%ldx %ld-%ldy -> %ldx %ldy %ldw %ldh",
+			viewport_xmin, viewport_xmax, viewport_ymin, viewport_ymax,
+			viewport_out.x, viewport_out.y, viewport_out.width, viewport_out.height);
+
 	return true;
 }
