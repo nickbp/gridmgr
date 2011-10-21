@@ -58,84 +58,40 @@ namespace {
 			ActiveWindow::Dimensions* out_exterior = NULL,
 			unsigned int* out_margin_width = NULL,
 			unsigned int* out_margin_height = NULL) {
-		unsigned int margin_width, margin_height;
-		{
-			size_t count = 0;
-			unsigned int* widths;
-			if (!(widths = (unsigned int*)x11_util::get_property(disp, win,
-									XA_CARDINAL, "_NET_FRAME_EXTENTS", &count))) {
-				//apparently fails with eg chrome, so just assume 0 and move on
-				//(yet chrome oddly works fine with unmaximize_unshade_window())
-				DEBUG_DIR("get frame extents failed, assuming extents = 0");
-				margin_width = margin_height = 0;
-			} else {
-				if (count != 4) {
-					ERROR("got size %lu, want %lu", count, 4);
-					x11_util::free_property(widths);
-					return false;
-				}
-				margin_width = widths[0] + widths[1];//left, right
-				margin_height = widths[2] + widths[3];//top, bottom
-				DEBUG("extents: width%u height%u",
-						margin_width, margin_height);
-				x11_util::free_property(widths);
-			}
+		XWindowAttributes attr;
+		if (XGetWindowAttributes(disp, win, &attr) == 0) {
+			ERROR_DIR("get geometry failed");
+			return false;
 		}
 
-		//_NET_EXTENTS doesnt include window decoration (titlebar etc), get that here:
-
-		long exterior_x, exterior_y;
-		unsigned int interior_width, interior_height;
-		Window rootwin;
-		{
-			unsigned int color_depth, border;
-			int margin_left_tmp, margin_top_tmp;
-			if (XGetGeometry(disp, win, &rootwin, &margin_left_tmp, &margin_top_tmp,
-							&interior_width, &interior_height,
-							&border, &color_depth) == 0) {
-				ERROR_DIR("get geometry failed");
-				return false;
-			}
-
-			//also get window coords (given as internal, subtract XGetGeo to get external)
-
-			int interior_x, interior_y;
-			if (XTranslateCoordinates(disp, win, rootwin, 0, 0,
-							&interior_x, &interior_y, &rootwin) == 0) {
-				ERROR_DIR("coordinate transform failed");
-				return false;
-			}
-
-			//only use XGetGeo margins when calculating exterior position:
-			exterior_x = interior_x - margin_left_tmp - border;
-			exterior_y = interior_y - margin_top_tmp - border;
-			DEBUG("pos: interior %ldx %ldy - geomargins %dw %dh %ub = exterior %ldx %ldy",
-					interior_x, interior_y,
-					margin_left_tmp, margin_top_tmp, border,
-					exterior_x, exterior_y);
-
-			//but use BOTH XGetGeo AND _NET_EXTENTS in calculating overall margin:
-			margin_width += margin_left_tmp + border + border;
-			margin_height += margin_top_tmp + border + border;
+		int interior_x, interior_y;
+		Window tmp;
+		if (XTranslateCoordinates(disp, win, attr.root, 0, 0,
+						&interior_x, &interior_y, &tmp) == 0) {
+			ERROR_DIR("coordinate transform failed");
+			return false;
 		}
+
+		DEBUG("pos: interior %dx %dy - attr %dx %dy %dw %dh %ub = exterior %dx %dy %dw %dh",
+				interior_x, interior_y,
+				attr.x, attr.y, attr.width, attr.height, attr.border_width,
+				interior_x - attr.x, interior_y - attr.y,
+				attr.width + attr.x + 2*attr.border_width,
+				attr.height + attr.y + 2*attr.border_width);
 
 		if (out_exterior != NULL) {
-			out_exterior->x = exterior_x;
-			out_exterior->y = exterior_y;
-			out_exterior->width = interior_width + margin_width;
-			out_exterior->height = interior_height + margin_height;
+			out_exterior->x = interior_x - attr.x;
+			out_exterior->y = interior_y - attr.y;
+			out_exterior->width = attr.width + attr.x + 2*attr.border_width;
+			out_exterior->height = attr.height + attr.y + 2*attr.border_width;
 		}
 
 		if (out_margin_width != NULL) {
-			*out_margin_width = margin_width;
+			*out_margin_width = attr.x + 2*attr.border_width;
 		}
 		if (out_margin_height != NULL) {
-			*out_margin_height = margin_height;
+			*out_margin_height = attr.y + 2*attr.border_width;
 		}
-
-		DEBUG("size: interior %luw %luh + summargins %dw %dh = %uw %uh",
-				interior_width, interior_height, margin_width, margin_height,
-				interior_width + margin_width, interior_height + margin_height);
 
 		return true;
 	}
