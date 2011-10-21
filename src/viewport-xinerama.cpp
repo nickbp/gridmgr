@@ -138,12 +138,9 @@ bool viewport::get_viewport_xinerama(Display* disp,
 				strut[1], strut[6], strut[7],
 				strut[2], strut[8], strut[9],
 				strut[3], strut[10], strut[11]);
+
 		//check whether the strut (which is given relative to the bounding box) is within
 		//the active screen, then update/shrink the active screen's viewport if it is.
-
-		//strut x = 1010
-		//bound x = 5
-		//viewport x = 1005
 
 		//left strut: first check if it intersects our screen's min/max y
 		if (strut[0] > 0 && INTERSECTION(active_ymin, active_ymax, strut[4], strut[5]) != 0) {
