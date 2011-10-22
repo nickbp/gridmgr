@@ -54,89 +54,96 @@ namespace {
 		}
 	}
 
+	void print_window(Display* disp, Window win) {
+		if (!config::debug_enabled) { return; }
+		Window root;
+		int x, y;
+		unsigned int width, height, border, depth;
+		if (XGetGeometry(disp, win, &root, &x, &y, &width,
+						&height, &border, &depth) == 0) {
+			ERROR_DIR("get geometry failed");
+			return;
+		}
+		DEBUG("  %dx %dy %uw %uh %ub", x, y, width, height, border);
+	}
+
 	bool get_window_size(Display* disp, Window win,
 			ActiveWindow::Dimensions* out_exterior = NULL,
 			unsigned int* out_margin_width = NULL,
 			unsigned int* out_margin_height = NULL) {
-		unsigned int margin_width, margin_height;
+		Window root;
+		unsigned int internal_width, internal_height;
 		{
-			size_t count = 0;
-			unsigned int* widths;
-			if (!(widths = (unsigned int*)x11_util::get_property(disp, win,
-									XA_CARDINAL, "_NET_FRAME_EXTENTS", &count))) {
-				//apparently fails with eg chrome, so just assume 0 and move on
-				//(yet chrome oddly works fine with unmaximize_unshade_window())
-				DEBUG_DIR("get frame extents failed, assuming extents = 0");
-				margin_width = margin_height = 0;
-			} else {
-				if (count != 4) {
-					ERROR("got size %lu, want %lu", count, 4);
-					x11_util::free_property(widths);
-					return false;
-				}
-				margin_width = widths[0] + widths[1];//left, right
-				margin_height = widths[2] + widths[3];//top, bottom
-				DEBUG("extents: width%u height%u",
-						margin_width, margin_height);
-				x11_util::free_property(widths);
-			}
-		}
-
-		//_NET_EXTENTS doesnt include window decoration (titlebar etc), get that here:
-
-		long exterior_x, exterior_y;
-		unsigned int interior_width, interior_height;
-		Window rootwin;
-		{
-			unsigned int color_depth, border;
-			int margin_left_tmp, margin_top_tmp;
-			if (XGetGeometry(disp, win, &rootwin, &margin_left_tmp, &margin_top_tmp,
-							&interior_width, &interior_height,
-							&border, &color_depth) == 0) {
+			/* first, get the interior width/height from this window
+			   (so that we can calculate margins) */
+			int x, y;
+			unsigned int border, depth;
+			if (XGetGeometry(disp, win, &root, &x, &y, &internal_width,
+							&internal_height, &border, &depth) == 0) {
 				ERROR_DIR("get geometry failed");
 				return false;
 			}
+		}
 
-			//also get window coords (given as internal, subtract XGetGeo to get external)
+		if (win == root) {
+			ERROR_DIR("this window is root! treating this as an error.");
+			return false;
+		}
 
-			int interior_x, interior_y;
-			if (XTranslateCoordinates(disp, win, rootwin, 0, 0,
-							&interior_x, &interior_y, &rootwin) == 0) {
-				ERROR_DIR("coordinate transform failed");
+		/* now traverse up the parents until we reach the one JUST BEFORE root,
+		   and get the external width/height and x/y from that. */
+		Window just_before_root;
+		{
+			int count = 1;
+			Window parent = win;
+			Window* children;
+			unsigned int children_count;
+			do {
+				just_before_root = parent;
+				if (XQueryTree(disp, just_before_root, &root,
+								&parent, &children, &children_count) == 0) {
+					ERROR_DIR("get query tree failed");
+					return false;
+				}
+				if (children != NULL) {
+					XFree(children);
+				}
+				DEBUG("%d window=%lu, parent=%lu, root=%lu",
+						count, just_before_root, parent, root);
+				print_window(disp, just_before_root);
+			} while (++count < 50 && parent != root);
+		}
+
+		int x, y;
+		unsigned int external_width, external_height;
+		{
+			unsigned int border, depth;
+			if (XGetGeometry(disp, just_before_root, &root, &x, &y, &external_width,
+							&external_height, &border, &depth) == 0) {
+				ERROR_DIR("get geometry failed");
 				return false;
 			}
-
-			//only use XGetGeo margins when calculating exterior position:
-			exterior_x = interior_x - margin_left_tmp - border;
-			exterior_y = interior_y - margin_top_tmp - border;
-			DEBUG("pos: interior %ldx %ldy - geomargins %dw %dh %ub = exterior %ldx %ldy",
-					interior_x, interior_y,
-					margin_left_tmp, margin_top_tmp, border,
-					exterior_x, exterior_y);
-
-			//but use BOTH XGetGeo AND _NET_EXTENTS in calculating overall margin:
-			margin_width += margin_left_tmp + border + border;
-			margin_height += margin_top_tmp + border + border;
 		}
 
 		if (out_exterior != NULL) {
-			out_exterior->x = exterior_x;
-			out_exterior->y = exterior_y;
-			out_exterior->width = interior_width + margin_width;
-			out_exterior->height = interior_height + margin_height;
+			out_exterior->x = x;
+			out_exterior->y = y;
+			out_exterior->width = external_width;
+			out_exterior->height = external_height;
 		}
 
 		if (out_margin_width != NULL) {
-			*out_margin_width = margin_width;
+			*out_margin_width = external_width - internal_width;
 		}
 		if (out_margin_height != NULL) {
-			*out_margin_height = margin_height;
+			*out_margin_height = external_height - internal_height;
 		}
 
-		DEBUG("size: interior %luw %luh + summargins %dw %dh = %uw %uh",
-				interior_width, interior_height, margin_width, margin_height,
-				interior_width + margin_width, interior_height + margin_height);
-
+		DEBUG("size: exterior %uw %uh - interior %uw %uh = margins %dw %dh",
+				external_width, external_height,
+				internal_width, internal_height,
+				external_width - internal_width,
+				external_height - internal_height);
 		return true;
 	}
 
