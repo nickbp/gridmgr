@@ -19,9 +19,12 @@
 #include <getopt.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #include "config.h"
 #include "grid.h"
+
+#define TIMESTR_MAX 128 // arbitrarily large
 
 void syntax(char* appname) {
 	ERROR_RAWDIR("");
@@ -129,6 +132,24 @@ bool parse_config(int argc, char* argv[]) {
 				}
 				config::fout = logfile;
 				config::ferr = logfile;
+				char now_s[TIMESTR_MAX];
+				{
+					time_t now = time(NULL);
+					struct tm now_tm;
+					localtime_r(&now, &now_tm);
+					if (strftime(now_s, TIMESTR_MAX, "%a, %d %b %Y %T %z", &now_tm) == 0) {
+						ERROR_DIR("strftime failed");
+						return false;
+					}
+				}
+				fprintf(logfile, "--- %s ---\n", now_s);
+				for (int i = 0; i < argc && argc < 100;) {
+					fprintf(logfile, "%s", argv[i]);
+					if (++i < argc) {
+						fprintf(logfile, " ");
+					}
+				}
+				fprintf(logfile, "\n");
 			}
 			break;
 		default:

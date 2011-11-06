@@ -19,18 +19,20 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "window.h"
+#include <X11/Xlib.h>
+
+#include "dimensions.h"
 #include "config.h"
 
 namespace viewport {
 
 	bool get_viewport_ewmh(Display* disp,
-			ActiveWindow::Dimensions& viewport_out);
+			Dimensions& viewport_out);
 
 #ifdef USE_XINERAMA
 	bool get_viewport_xinerama(Display* disp,
-			const ActiveWindow::Dimensions& activewin,
-			ActiveWindow::Dimensions& viewport_out);
+			const Dimensions& activewin,
+			Dimensions& viewport_out);
 #endif
 
 }

@@ -39,8 +39,8 @@ static int INTERSECTION(int a1, int a2, int b1, int b2) {
 }
 
 bool viewport::get_viewport_xinerama(Display* disp,
-		const ActiveWindow::Dimensions& activewin,
-		ActiveWindow::Dimensions& viewport_out) {
+		const Dimensions& activewin,
+		Dimensions& viewport_out) {
 	//pick the xinerama screen which the active window 'belongs' to (= 'active screen')
 	//also calculate a bounding box across all screens (needed for strut math)
 	long bound_xmin = 0, bound_xmax = 0, bound_ymin = 0, bound_ymax = 0,//bounding box of all screens

@@ -1,5 +1,5 @@
-#ifndef GRIDMGR_GRID_H
-#define GRIDMGR_GRID_H
+#ifndef GRIDMGR_DIMENSIONS_H
+#define GRIDMGR_DIMENSIONS_H
 
 /*
   gridmgr - Organizes windows according to a grid.
@@ -19,13 +19,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "pos.h"
-
-namespace grid {
-	/* Selects the active window and moves/resizes it to the requested
-	   position, according to its current state.
-	   Returns true if successful, false otherwise. */
-	bool set_position(POS position);
-}
+struct Dimensions {
+	//position of the top left corner of the screen
+	long x;
+	long y;
+	//width,height are 'exterior' size, including any borders/decorations
+	unsigned long width;
+	unsigned long height;
+};
 
 #endif

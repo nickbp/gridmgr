@@ -21,6 +21,8 @@
 
 #include <X11/Xlib.h>
 
+#include "dimensions.h"
+
 /*
   NOTE: This class internally assumes that a new active window won't be
   selected for the lifetime of the constructed object. Any changes in
@@ -31,15 +33,6 @@ class ActiveWindow {
  public:
 	ActiveWindow();
 	virtual ~ActiveWindow();
-
-	struct Dimensions {
-		//relative to the top left corner of the screen
-		long x;
-		long y;
-		//width,height include any applicable borders/decorations ('exterior' size)
-		unsigned long width;
-		unsigned long height;
-	};
 
 	bool Sizes(Dimensions& viewport, Dimensions& activewin) const;
 	bool MoveResize(const Dimensions& activewin);

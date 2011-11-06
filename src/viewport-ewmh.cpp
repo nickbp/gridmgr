@@ -21,7 +21,7 @@
 #include "config.h"
 
 bool viewport::get_viewport_ewmh(Display* disp,
-		ActiveWindow::Dimensions& viewport_out) {
+		Dimensions& viewport_out) {
 	//get current workspace
 	unsigned long cur_workspace;
 	{

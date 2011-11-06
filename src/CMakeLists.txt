@@ -28,6 +28,8 @@ SET(SRCS
   grid.h
   grid.cpp
   main.cpp
+  position.h
+  position.cpp
   viewport.h
   viewport-ewmh.cpp
   window.h

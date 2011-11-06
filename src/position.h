@@ -1,5 +1,5 @@
-#ifndef GRIDMGR_GRID_H
-#define GRIDMGR_GRID_H
+#ifndef GRIDMGR_POSITION_H
+#define GRIDMGR_POSITION_H
 
 /*
   gridmgr - Organizes windows according to a grid.
@@ -20,12 +20,18 @@
 */
 
 #include "pos.h"
+#include "dimensions.h"
 
-namespace grid {
-	/* Selects the active window and moves/resizes it to the requested
-	   position, according to its current state.
-	   Returns true if successful, false otherwise. */
-	bool set_position(POS position);
-}
+class PositionCalc {
+ public:
+	PositionCalc(const Dimensions& viewport,
+		 const Dimensions& window)
+	 : viewport(viewport), window(window) { }
+
+	bool NextPos(grid::POS request, Dimensions& out);
+
+ private:
+	const Dimensions viewport, window;
+};
 
 #endif

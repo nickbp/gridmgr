@@ -67,8 +67,47 @@ namespace {
 		DEBUG("  %dx %dy %uw %uh %ub", x, y, width, height, border);
 	}
 
+	bool check_window_allowed(Display* disp, Window win) {
+		/*
+		  check if this is a DESKTOP or DOCK type window. disallow moving it if so.
+		  (avoid messing with the user's desktop itself)
+		*/
+		bool ret = true;
+		{
+			size_t count = 0;
+			Atom* types;
+			static Atom desktop_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DESKTOP", False),
+				dock_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DOCK", False);
+
+			if (!(types = (Atom*)x11_util::get_property(disp, win,
+									XA_ATOM, "_NET_WM_WINDOW_TYPE", &count))) {
+				ERROR_DIR("couldnt get window types");
+				//we're just doing this to check that the window is allowed,
+				//no need to abort the whole thing.
+				return true;
+			}
+
+			for (size_t i = 0; i < count; ++i) {
+				DEBUG("type %lu: %d %s",
+						i, types[i], XGetAtomName(disp, types[i]));
+				if (types[i] == desktop_type || types[i] == dock_type) {
+					ret = false;
+					if (!config::debug_enabled) {
+						break;
+					}
+				}
+			}
+			x11_util::free_property(types);
+		}
+
+		if (!ret) {
+			LOG_DIR("Active window is a desktop or dock. Ignoring move request.");
+		}
+		return ret;
+	}
+
 	bool get_window_size(Display* disp, Window win,
-			ActiveWindow::Dimensions* out_exterior = NULL,
+			Dimensions* out_exterior = NULL,
 			unsigned int* out_margin_width = NULL,
 			unsigned int* out_margin_height = NULL) {
 		Window root;
@@ -148,9 +187,11 @@ namespace {
 	}
 
 	bool defullscreen_deshade_window(Display* disp, Window win) {
-		//this disagrees with docs, which say that we should be using a
-		//_NET_WM_STATE_DISABLE atom in data[0]. but that apparently doesn't
-		//work in practice, but '0' does. (and '1' works for ENABLE)
+		/*
+		  this disagrees with docs, which say that we should be using a
+		  _NET_WM_STATE_DISABLE atom in data[0]. but that apparently doesn't
+		  work in practice, but '0' does. (and '1' works for ENABLE)
+		*/
 
 		if (!client_msg(disp, win, "_NET_WM_STATE",
 						0,//1 = enable state(s), 0 = disable state(s)
@@ -164,9 +205,11 @@ namespace {
 	}
 
 	bool demaximize_window(Display* disp, Window win) {
-		//this disagrees with docs, which say that we should be using a
-		//_NET_WM_STATE_DISABLE atom in data[0]. but that apparently doesn't
-		//work in practice, but '0' does. (and '1' works for ENABLE)
+		/*
+		  this disagrees with docs, which say that we should be using a
+		  _NET_WM_STATE_DISABLE atom in data[0]. but that apparently doesn't
+		  work in practice, but '0' does. (and '1' works for ENABLE)
+		*/
 
 		if (!client_msg(disp, win, "_NET_WM_STATE",
 						0,//1 = enable state(s), 0 = disable state(s)
@@ -180,8 +223,8 @@ namespace {
 		return true;
 	}
 
-	bool get_viewport(Display* disp, const ActiveWindow::Dimensions& activewin,
-			ActiveWindow::Dimensions& viewport_out) {
+	bool get_viewport(Display* disp, const Dimensions& activewin,
+			Dimensions& viewport_out) {
 #ifdef USE_XINERAMA
 		//try xinerama, fall back to ewmh if xinerama is unavailable
 		return viewport::get_viewport_xinerama(disp, activewin, viewport_out) ||
@@ -222,6 +265,10 @@ ActiveWindow::~ActiveWindow() {
 bool ActiveWindow::Sizes(Dimensions& viewport, Dimensions& activewin) const {
 	CHECK_STATE();
 
+	if (!check_window_allowed(disp, *win)) {
+		return false;
+	}
+
 	if (config::debug_enabled) {
 		size_t count = 0;
 		Atom* states;
@@ -230,7 +277,7 @@ bool ActiveWindow::Sizes(Dimensions& viewport, Dimensions& activewin) const {
 			ERROR_DIR("couldnt get window states");
 		} else {
 			for (size_t i = 0; i < count; ++i) {
-				LOG("state %lu: %d %s",
+				DEBUG("state %lu: %d %s",
 						i, states[i], XGetAtomName(disp, states[i]));
 			}
 			x11_util::free_property(states);
@@ -242,10 +289,12 @@ bool ActiveWindow::Sizes(Dimensions& viewport, Dimensions& activewin) const {
 		return false;
 	}
 
-	//special case: if the active window is fullscreen, the desktop workarea is
-	//wrong (ie the obscured taskbar extents aren't included). get around this
-	//by unfullscreening the window first (if applicable). but return the
-	//window's dimensions from when it was fullscreened/shaded.
+	/*
+	  special case: if the active window is fullscreen, the desktop workarea is
+	  wrong (ie the obscured taskbar extents aren't included). get around this
+	  by unfullscreening the window first (if applicable). but return the
+	  window's dimensions from when it was fullscreened/shaded.
+	*/
 	defullscreen_deshade_window(disp, *win);//disregard failure
 
 	if (!get_viewport(disp, activewin, viewport)) {
