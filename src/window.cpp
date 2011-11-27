@@ -68,12 +68,12 @@ namespace {
 	}
 
 	bool check_window_allowed(Display* disp, Window win) {
-		/*
-		  check if this is a DESKTOP or DOCK type window. disallow moving it if so.
-		  (avoid messing with the user's desktop itself)
-		*/
 		bool ret = true;
 		{
+			/*
+			  disallow moving this window if it has type DESKTOP or DOCK.
+			  (avoid messing with the user's desktop components)
+			*/
 			size_t count = 0;
 			Atom* types;
 			static Atom desktop_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DESKTOP", False),
@@ -82,22 +82,52 @@ namespace {
 			if (!(types = (Atom*)x11_util::get_property(disp, win,
 									XA_ATOM, "_NET_WM_WINDOW_TYPE", &count))) {
 				ERROR_DIR("couldnt get window types");
-				//we're just doing this to check that the window is allowed,
-				//no need to abort the whole thing.
-				return true;
-			}
-
-			for (size_t i = 0; i < count; ++i) {
-				DEBUG("type %lu: %d %s",
-						i, types[i], XGetAtomName(disp, types[i]));
-				if (types[i] == desktop_type || types[i] == dock_type) {
-					ret = false;
-					if (!config::debug_enabled) {
-						break;
+				//assume window types are allowed, keep going
+			} else {
+				for (size_t i = 0; i < count; ++i) {
+					DEBUG("type %lu: %d %s",
+							i, types[i], XGetAtomName(disp, types[i]));
+					if (types[i] == desktop_type || types[i] == dock_type) {
+						ret = false;
+						if (!config::debug_enabled) {
+							break;
+						}
 					}
 				}
+				x11_util::free_property(types);
 			}
-			x11_util::free_property(types);
+		}
+
+		{
+			/*
+			  also disallow moving this window if it has BOTH the SKIP_PAGER and SKIP_TASKBAR.
+			  (avoid messing with auxiliary panels and menus)
+			*/
+			size_t count = 0;
+			Atom* states;
+			static Atom skip_pager = XInternAtom(disp, "_NET_WM_STATE_SKIP_PAGER", False),
+				skip_taskbar = XInternAtom(disp, "_NET_WM_STATE_SKIP_TASKBAR", False);
+
+			if (!(states = (Atom*)x11_util::get_property(disp, win,
+									XA_ATOM, "_NET_WM_STATE", &count))) {
+				ERROR_DIR("couldnt get window states");
+				//assume window states are allowed, keep going
+			} else {
+				bool has_skip_pager = false, has_skip_taskbar = false;
+				for (size_t i = 0; i < count; ++i) {
+					DEBUG("state %lu: %d %s",
+							i, states[i], XGetAtomName(disp, states[i]));
+					if (states[i] == skip_pager) {
+						has_skip_pager = true;
+					} else if (states[i] == skip_taskbar) {
+						has_skip_taskbar = true;
+					}
+				}
+				x11_util::free_property(states);
+				if (has_skip_pager && has_skip_taskbar) {
+					ret = false;
+				}
+			}
 		}
 
 		if (!ret) {
@@ -267,21 +297,6 @@ bool ActiveWindow::Sizes(Dimensions& viewport, Dimensions& activewin) const {
 
 	if (!check_window_allowed(disp, *win)) {
 		return false;
-	}
-
-	if (config::debug_enabled) {
-		size_t count = 0;
-		Atom* states;
-		if (!(states = (Atom*)x11_util::get_property(disp, *win,
-								XA_ATOM, "_NET_WM_STATE", &count))) {
-			ERROR_DIR("couldnt get window states");
-		} else {
-			for (size_t i = 0; i < count; ++i) {
-				DEBUG("state %lu: %d %s",
-						i, states[i], XGetAtomName(disp, states[i]));
-			}
-			x11_util::free_property(states);
-		}
 	}
 
 	if (!get_window_size(disp, *win, &activewin, NULL, NULL)) {
