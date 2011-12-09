@@ -36,6 +36,7 @@ class ActiveWindow {
 
 	bool Sizes(Dimensions& viewport, Dimensions& activewin) const;
 	bool MoveResize(const Dimensions& activewin);
+	bool Maximize();
 
  private:
 	Display* disp;

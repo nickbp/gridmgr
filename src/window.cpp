@@ -81,7 +81,7 @@ namespace {
 
 			if (!(types = (Atom*)x11_util::get_property(disp, win,
 									XA_ATOM, "_NET_WM_WINDOW_TYPE", &count))) {
-				ERROR_DIR("couldnt get window types");
+				ERROR_DIR("couldn't get window types");
 				//assume window types are allowed, keep going
 			} else {
 				for (size_t i = 0; i < count; ++i) {
@@ -110,7 +110,7 @@ namespace {
 
 			if (!(states = (Atom*)x11_util::get_property(disp, win,
 									XA_ATOM, "_NET_WM_STATE", &count))) {
-				ERROR_DIR("couldnt get window states");
+				ERROR_DIR("couldn't get window states");
 				//assume window states are allowed, keep going
 			} else {
 				bool has_skip_pager = false, has_skip_taskbar = false;
@@ -228,25 +228,30 @@ namespace {
 						XInternAtom(disp, "_NET_WM_STATE_SHADED", False),
 						XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False),
 						SOURCE_INDICATION, 0)) {
-			ERROR_DIR("couldnt unshade/defullscreen");
+			ERROR_DIR("couldn't unshade/defullscreen");
 			return false;
 		}
 		return true;
 	}
 
-	bool demaximize_window(Display* disp, Window win) {
+	bool maximize_window(Display* disp, Window win, bool maximize) {
 		/*
 		  this disagrees with docs, which say that we should be using a
-		  _NET_WM_STATE_DISABLE atom in data[0]. but that apparently doesn't
-		  work in practice, but '0' does. (and '1' works for ENABLE)
+		  _NET_WM_STATE_DISABLE/_ENABLE atom in data[0]. That apparently doesn't
+		  work in practice, but '0'/'1' do.
 		*/
 
+		int val = (maximize) ? 1 : 0;//just to be explicit
 		if (!client_msg(disp, win, "_NET_WM_STATE",
-						0,//1 = enable state(s), 0 = disable state(s)
+						val,//1 = enable state(s), 0 = disable state(s)
 						XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_VERT", False),
 						XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_HORZ", False),
 						SOURCE_INDICATION, 0)) {
-			ERROR_DIR("couldnt demaximize");
+			if (maximize) {
+				ERROR_DIR("couldn't maximize");
+			} else {
+				ERROR_DIR("couldn't demaximize");
+			}
 			return false;
 		}
 
@@ -300,7 +305,7 @@ bool ActiveWindow::Sizes(Dimensions& viewport, Dimensions& activewin) const {
 	}
 
 	if (!get_window_size(disp, *win, &activewin, NULL, NULL)) {
-		ERROR_DIR("couldnt get window size");
+		ERROR_DIR("couldn't get window size");
 		return false;
 	}
 
@@ -333,7 +338,7 @@ bool ActiveWindow::MoveResize(const Dimensions& activewin) {
 	}
 
 	//demaximize the window before attempting to move it
-	demaximize_window(disp, *win);//disregard failure
+	maximize_window(disp, *win, false);//disregard failure
 
 	unsigned long new_interior_width = activewin.width - margin_width,
 		new_interior_height = activewin.height - margin_height;
@@ -344,6 +349,17 @@ bool ActiveWindow::MoveResize(const Dimensions& activewin) {
 			margin_width, margin_height,
 			activewin.x, activewin.y, new_interior_width, new_interior_height);
 
-	return XMoveResizeWindow(disp, *win, activewin.x, activewin.y,
-			new_interior_width, new_interior_height) == 0;
+	if (XMoveResizeWindow(disp, *win, activewin.x, activewin.y,
+					new_interior_width, new_interior_height) == 0) {
+		ERROR("MoveResize to %ldx %ldy %luw %luh failed.",
+				activewin.x, activewin.y, new_interior_width, new_interior_height);
+		return false;
+	}
+	return true;
+}
+
+bool ActiveWindow::Maximize() {
+	CHECK_STATE();
+
+	return maximize_window(disp, *win, true);
 }

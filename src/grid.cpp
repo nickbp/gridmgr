@@ -21,6 +21,8 @@
 #include "position.h"
 #include "window.h"
 
+#include "config.h"
+
 bool grid::set_position(POS pos) {
 	//initializes to the currently active window
 	ActiveWindow win;
@@ -34,7 +36,23 @@ bool grid::set_position(POS pos) {
 	//using the requested position and current dimensions,
 	//calculate and set new dimensions
 	PositionCalc calc(viewport, cur_dim);
-	
+
+	State cur_state, next_state;
+	if (!calc.CurState(cur_state) ||
+			!calc.NextState(cur_state, pos, next_state)) {
+		return false;
+	}
+
+	//if we're going to be filling the screen anyway, just maximize
+	if (next_state.pos == grid::POS_CENTER &&
+		next_state.mode == grid::MODE_THREE_COL_L) {
+		if (win.Maximize()) {
+			return true;
+		}
+		ERROR_DIR("Maximizing window failed, falling back to filling screen.");
+	}
+
 	Dimensions next_dim;
-	return calc.NextPos(pos, next_dim) && win.MoveResize(next_dim);
+	return calc.StateToDim(next_state, next_dim) &&
+		win.MoveResize(next_dim);
 }
