@@ -27,7 +27,7 @@
 typedef std::vector<Dimensions> dim_list_t;
 
 namespace neighbor {
-	void select(grid::DIR dir, const dim_list_t& all, size_t active, size_t& select);
+	void select(grid::POS dir, const dim_list_t& all, size_t active, size_t& select);
 }
 
 #endif

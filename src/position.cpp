@@ -66,21 +66,21 @@ bool PositionCalc::CurState(const Dimensions& viewport, State& out) const {
 			if (NEAR(rel_x, 0)) {
 				if (NEAR(rel_y, 0)) {
 					// top left quadrant
-					out.pos = grid::POS_TOP_LEFT;
+					out.pos = grid::POS_UP_LEFT;
 					out.mode = grid::MODE_TWO_COL;
 				} else if (NEAR(rel_y, viewport.height / 2.)) {
 					// bottom left quadrant
-					out.pos = grid::POS_BOT_LEFT;
+					out.pos = grid::POS_DOWN_LEFT;
 					out.mode = grid::MODE_TWO_COL;
 				}
 			} else if (NEAR(rel_x, viewport.width / 2.)) {
 				if (NEAR(rel_y, 0)) {
 					// top right quadrant
-					out.pos = grid::POS_TOP_RIGHT;
+					out.pos = grid::POS_UP_RIGHT;
 					out.mode = grid::MODE_TWO_COL;
 				} else if (NEAR(rel_y, viewport.height / 2.)) {
 					// bottom right quadrant
-					out.pos = grid::POS_BOT_RIGHT;
+					out.pos = grid::POS_DOWN_RIGHT;
 					out.mode = grid::MODE_TWO_COL;
 				}
 			}
@@ -101,31 +101,31 @@ bool PositionCalc::CurState(const Dimensions& viewport, State& out) const {
 			if (NEAR(rel_x, 0)) {
 				if (NEAR(rel_y, 0)) {
 					// top left col
-					out.pos = grid::POS_TOP_LEFT;
+					out.pos = grid::POS_UP_LEFT;
 					out.mode = grid::MODE_THREE_COL_S;
 				} if (NEAR(rel_y, viewport.height / 2.)) {
 					// bottom left col
-					out.pos = grid::POS_BOT_LEFT;
+					out.pos = grid::POS_DOWN_LEFT;
 					out.mode = grid::MODE_THREE_COL_S;
 				}
 			} else if (NEAR(rel_x, viewport.width / 3.)) {
 				if (NEAR(rel_y, 0)) {
 					// top center col
-					out.pos = grid::POS_TOP_CENTER;
+					out.pos = grid::POS_UP_CENTER;
 					out.mode = grid::MODE_THREE_COL_S;
 				} else if (NEAR(rel_y, viewport.height / 2.)) {
 					// bottom center col
-					out.pos = grid::POS_BOT_CENTER;
+					out.pos = grid::POS_DOWN_CENTER;
 					out.mode = grid::MODE_THREE_COL_S;
 				}
 			} else if (NEAR(rel_x, 2 * viewport.width / 3.)) {
 				if (NEAR(rel_y, 0)) {
 					// top right col
-					out.pos = grid::POS_TOP_RIGHT;
+					out.pos = grid::POS_UP_RIGHT;
 					out.mode = grid::MODE_THREE_COL_S;
 				} else if (NEAR(rel_y, viewport.height / 2.)) {
 					// bottom right col
-					out.pos = grid::POS_BOT_RIGHT;
+					out.pos = grid::POS_DOWN_RIGHT;
 					out.mode = grid::MODE_THREE_COL_S;
 				}
 			}
@@ -150,21 +150,21 @@ bool PositionCalc::CurState(const Dimensions& viewport, State& out) const {
 			if (NEAR(rel_x, 0)) {
 				if (NEAR(rel_y, 0)) {
 					// top left two cols
-					out.pos = grid::POS_TOP_LEFT;
+					out.pos = grid::POS_UP_LEFT;
 					out.mode = grid::MODE_THREE_COL_L;
 				} else if (NEAR(rel_y, viewport.height / 2.)) {
 					// bottom left two cols
-					out.pos = grid::POS_BOT_LEFT;
+					out.pos = grid::POS_DOWN_LEFT;
 					out.mode = grid::MODE_THREE_COL_L;
 				}
 			} else if (NEAR(rel_x, viewport.width / 3.)) {
 				if (NEAR(rel_y, 0)) {
 					// top right two cols
-					out.pos = grid::POS_TOP_RIGHT;
+					out.pos = grid::POS_UP_RIGHT;
 					out.mode = grid::MODE_THREE_COL_L;
 				} else if (NEAR(rel_y, viewport.height / 2.)) {
 					// bottom right two cols
-					out.pos = grid::POS_BOT_RIGHT;
+					out.pos = grid::POS_DOWN_RIGHT;
 					out.mode = grid::MODE_THREE_COL_L;
 				}
 			}
@@ -185,11 +185,11 @@ bool PositionCalc::CurState(const Dimensions& viewport, State& out) const {
 		if (NEAR(window.height, viewport.height / 2.)) {
 			if (NEAR(rel_y, 0)) {
 				// top half
-				out.pos = grid::POS_TOP_CENTER;
+				out.pos = grid::POS_UP_CENTER;
 				out.mode = grid::MODE_THREE_COL_L;
 			} else if (NEAR(rel_y, viewport.height / 2.)) {
 				// bottom half
-				out.pos = grid::POS_BOT_CENTER;
+				out.pos = grid::POS_DOWN_CENTER;
 				out.mode = grid::MODE_THREE_COL_L;
 			}
 		} else if (NEAR(window.height, viewport.height) &&
@@ -217,9 +217,9 @@ bool PositionCalc::NextState(const State& cur, grid::POS req_pos, State& out) co
 		// position is same, so rotate mode
 		out.pos = cur.pos;
 		switch (cur.pos) {
-		case grid::POS_TOP_CENTER:
+		case grid::POS_UP_CENTER:
 		case grid::POS_CENTER:
-		case grid::POS_BOT_CENTER:
+		case grid::POS_DOWN_CENTER:
 			// for center col: 3x2L -> 3x2S (-> 3x2L) (no 2x2)
 			switch (cur.mode) {
 			case grid::MODE_THREE_COL_L:
@@ -249,9 +249,9 @@ bool PositionCalc::NextState(const State& cur, grid::POS req_pos, State& out) co
 		// new position, so start with initial mode
 		out.pos = req_pos;
 		switch (req_pos) {
-		case grid::POS_TOP_CENTER:
+		case grid::POS_UP_CENTER:
 		case grid::POS_CENTER:
-		case grid::POS_BOT_CENTER:
+		case grid::POS_DOWN_CENTER:
 			// for center col: start with 3x2L
 			out.mode = grid::MODE_THREE_COL_L;
 			break;
@@ -276,15 +276,15 @@ bool PositionCalc::StateToDim(const Dimensions& viewport, const State& state,
 	switch (state.mode) {
 	case grid::MODE_TWO_COL:
 		switch (state.pos) {
-		case grid::POS_TOP_LEFT:// top left quadrant
+		case grid::POS_UP_LEFT:// top left quadrant
 			rel_x = 0;
 			rel_y = 0;
 			out.width = viewport.width / 2.;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_TOP_CENTER:// invalid, use mode THREE_COL_S/L
+		case grid::POS_UP_CENTER:// invalid, use mode THREE_COL_S/L
 			return false;
-		case grid::POS_TOP_RIGHT:// top right quadrant
+		case grid::POS_UP_RIGHT:// top right quadrant
 			rel_x = viewport.width / 2.;
 			rel_y = 0;
 			out.width = viewport.width / 2.;
@@ -304,15 +304,15 @@ bool PositionCalc::StateToDim(const Dimensions& viewport, const State& state,
 			out.width = viewport.width / 2.;
 			out.height = viewport.height;
 			break;
-		case grid::POS_BOT_LEFT:// bottom left quadrant
+		case grid::POS_DOWN_LEFT:// bottom left quadrant
 			rel_x = 0;
 			rel_y = viewport.height / 2.;
 			out.width = viewport.width / 2.;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_BOT_CENTER:// invalid, use mode THREE_COL_S/L
+		case grid::POS_DOWN_CENTER:// invalid, use mode THREE_COL_S/L
 			return false;
-		case grid::POS_BOT_RIGHT:// bottom right quadrant
+		case grid::POS_DOWN_RIGHT:// bottom right quadrant
 			rel_x = viewport.width / 2.;
 			rel_y = viewport.height / 2.;
 			out.width = viewport.width / 2.;
@@ -325,19 +325,19 @@ bool PositionCalc::StateToDim(const Dimensions& viewport, const State& state,
 		break;
 	case grid::MODE_THREE_COL_S:
 		switch (state.pos) {
-		case grid::POS_TOP_LEFT:// top left col
+		case grid::POS_UP_LEFT:// top left col
 			rel_x = 0;
 			rel_y = 0;
 			out.width = viewport.width / 3.;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_TOP_CENTER:// top center col
+		case grid::POS_UP_CENTER:// top center col
 			rel_x = viewport.width / 3.;
 			rel_y = 0;
 			out.width = viewport.width / 3.;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_TOP_RIGHT:// top right col
+		case grid::POS_UP_RIGHT:// top right col
 			rel_x = 2 * viewport.width / 3.;
 			rel_y = 0;
 			out.width = viewport.width / 3.;
@@ -361,19 +361,19 @@ bool PositionCalc::StateToDim(const Dimensions& viewport, const State& state,
 			out.width = viewport.width / 3;
 			out.height = viewport.height;
 			break;
-		case grid::POS_BOT_LEFT:// bottom left col
+		case grid::POS_DOWN_LEFT:// bottom left col
 			rel_x = 0;
 			rel_y = viewport.height / 2.;
 			out.width = viewport.width / 3.;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_BOT_CENTER:// bottom center col
+		case grid::POS_DOWN_CENTER:// bottom center col
 			rel_x = viewport.width / 3.;
 			rel_y = viewport.height / 2.;
 			out.width = viewport.width / 3.;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_BOT_RIGHT:// bottom right col
+		case grid::POS_DOWN_RIGHT:// bottom right col
 			rel_x = 2 * viewport.width / 3.;
 			rel_y = viewport.height / 2.;
 			out.width = viewport.width / 3.;
@@ -385,19 +385,19 @@ bool PositionCalc::StateToDim(const Dimensions& viewport, const State& state,
 		break;
 	case grid::MODE_THREE_COL_L:
 		switch (state.pos) {
-		case grid::POS_TOP_LEFT:// top left two cols
+		case grid::POS_UP_LEFT:// top left two cols
 			rel_x = 0;
 			rel_y = 0;
 			out.width = 2 * viewport.width / 3.;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_TOP_CENTER:// top half
+		case grid::POS_UP_CENTER:// top half
 			rel_x = 0;
 			rel_y = 0;
 			out.width = viewport.width;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_TOP_RIGHT:// top right two cols
+		case grid::POS_UP_RIGHT:// top right two cols
 			rel_x = viewport.width / 3.;
 			rel_y = 0;
 			out.width = 2 * viewport.width / 3.;
@@ -421,19 +421,19 @@ bool PositionCalc::StateToDim(const Dimensions& viewport, const State& state,
 			out.width = 2 * viewport.width / 3.;
 			out.height = viewport.height;
 			break;
-		case grid::POS_BOT_LEFT:// bottom left two cols
+		case grid::POS_DOWN_LEFT:// bottom left two cols
 			rel_x = 0;
 			rel_y = viewport.height / 2.;
 			out.width = 2 * viewport.width / 3.;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_BOT_CENTER:// bottom half
+		case grid::POS_DOWN_CENTER:// bottom half
 			rel_x = 0;
 			rel_y = viewport.height / 2.;
 			out.width = viewport.width;
 			out.height = viewport.height / 2.;
 			break;
-		case grid::POS_BOT_RIGHT:// bottom right two cols
+		case grid::POS_DOWN_RIGHT:// bottom right two cols
 			rel_x = viewport.width / 3.;
 			rel_y = viewport.height / 2.;
 			out.width = 2 * viewport.width / 3.;
@@ -469,7 +469,7 @@ void PositionCalc::ViewportToDim(const Dimensions& cur_viewport,
 	const double ratio_x = next_viewport.width / (double)cur_viewport.width,
 		ratio_y = next_viewport.height / (double)cur_viewport.height;
 
-	// avoid implicit floor to avoid some rounding error:
+	// avoid implicit floor to avoid cumulative rounding error:
 	out.x = round((window.x - cur_viewport.x) * ratio_x + next_viewport.x);
 	out.y = round((window.y - cur_viewport.y) * ratio_y + next_viewport.y);
 	out.width = round(window.width * ratio_x);

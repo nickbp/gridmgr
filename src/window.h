@@ -26,7 +26,7 @@
 
 namespace window {
 	/* Finds the nearest window in the given direction and activates it. */
-	bool select_activate(grid::DIR dir);
+	bool select_activate(grid::POS dir);
 }
 
 class ActiveWindow {

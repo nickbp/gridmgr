@@ -24,9 +24,9 @@ namespace grid {
 	 * CURRENT is "use the current position", useful when only switching monitors */
 	enum POS {
 		POS_UNKNOWN, POS_CURRENT,
-		POS_TOP_LEFT, POS_TOP_CENTER, POS_TOP_RIGHT,
+		POS_UP_LEFT, POS_UP_CENTER, POS_UP_RIGHT,
 		POS_LEFT, POS_CENTER, POS_RIGHT,
-		POS_BOT_LEFT, POS_BOT_CENTER, POS_BOT_RIGHT
+		POS_DOWN_LEFT, POS_DOWN_CENTER, POS_DOWN_RIGHT
 	};
 
 	inline const char* pos_str(POS pos) {
@@ -35,49 +35,24 @@ namespace grid {
 			return "UNKNOWN";
 		case POS_CURRENT:
 			return "CURRENT";
-		case POS_TOP_LEFT:
-			return "TOP_LEFT";
-		case POS_TOP_CENTER:
-			return "TOP_CENTER";
-		case POS_TOP_RIGHT:
-			return "TOP_RIGHT";
+		case POS_UP_LEFT:
+			return "UP_LEFT";
+		case POS_UP_CENTER:
+			return "UP_CENTER";
+		case POS_UP_RIGHT:
+			return "UP_RIGHT";
 		case POS_LEFT:
 			return "LEFT";
 		case POS_CENTER:
 			return "CENTER";
 		case POS_RIGHT:
 			return "RIGHT";
-		case POS_BOT_LEFT:
-			return "BOT_LEFT";
-		case POS_BOT_CENTER:
-			return "BOT_CENTER";
-		case POS_BOT_RIGHT:
-			return "BOT_RIGHT";
-		}
-		return "???";
-	}
-
-	/* These are the available directions for movement between monitors and/or
-	 * windows. CURRENT is "use the current monitor/window". */
-	enum DIR {
-		DIR_UNKNOWN, DIR_CURRENT,
-		DIR_UP, DIR_RIGHT, DIR_DOWN, DIR_LEFT
-	};
-
-	inline const char* dir_str(DIR dir) {
-		switch (dir) {
-		case DIR_UNKNOWN:
-			return "UNKNOWN";
-		case DIR_CURRENT:
-			return "CURRENT";
-		case DIR_UP:
-			return "UP";
-		case DIR_RIGHT:
-			return "RIGHT";
-		case DIR_DOWN:
-			return "DOWN";
-		case DIR_LEFT:
-			return "LEFT";
+		case POS_DOWN_LEFT:
+			return "DOWN_LEFT";
+		case POS_DOWN_CENTER:
+			return "DOWN_CENTER";
+		case POS_DOWN_RIGHT:
+			return "DOWN_RIGHT";
 		}
 		return "???";
 	}

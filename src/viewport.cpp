@@ -58,7 +58,7 @@ namespace {
 	}
 }
 
-bool ViewportCalc::Viewports(grid::DIR monitor,
+bool ViewportCalc::Viewports(grid::POS monitor,
 		Dimensions& cur_viewport, Dimensions& next_viewport) const {
 	dim_list_t viewports;
 	size_t active, neighbor;

@@ -27,7 +27,7 @@ public:
 	ViewportCalc(const Dimensions& activewin)
 		: activewin(activewin) { }
 
-	bool Viewports(grid::DIR monitor,
+	bool Viewports(grid::POS monitor,
 			Dimensions& cur_viewport, Dimensions& next_viewport) const;
 
 private:

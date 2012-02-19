@@ -22,11 +22,11 @@
 #include "viewport.h"
 #include "window.h"
 
-bool grid::set_window(DIR window) {
+bool grid::set_active(POS window) {
 	return window::select_activate(window);
 }
 
-bool grid::set_position(POS pos, DIR monitor) {
+bool grid::set_position(POS gridpos, POS monitor) {
 	// initializes to the currently active window
 	ActiveWindow win;
 
@@ -59,7 +59,7 @@ bool grid::set_position(POS pos, DIR monitor) {
 	if (/* cur_viewport + cur_window -> cur_state */
 			!pcalc.CurState(cur_viewport, cur_state) ||
 			/* cur_state + pos -> next_state */
-			!pcalc.NextState(cur_state, pos, next_state)) {
+			!pcalc.NextState(cur_state, gridpos, next_state)) {
 		return false;
 	}
 

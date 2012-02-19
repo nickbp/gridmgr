@@ -246,7 +246,7 @@ namespace {
 	}
 }
 
-bool window::select_activate(grid::DIR dir) {
+bool window::select_activate(grid::POS dir) {
 	Display* disp = XOpenDisplay(NULL);
 	if (disp == NULL) {
 		ERROR_DIR("unable to get display");

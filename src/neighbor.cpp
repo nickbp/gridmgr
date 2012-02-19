@@ -33,60 +33,122 @@ namespace {
 			  y(MIDPOINT(d.y, d.height)) { }
 
 		/* Returns whether 'p' is in the specified direction relative to this
-		   point. Eg DIR_UP -> "is p above this?" */
-		bool direction(grid::DIR dir, const point& p) const {
+		   point. Eg POS_UP -> "is p above this?" */
+		bool direction(grid::POS dir, const point& p) const {
 			// note: M_PI_4 == pi/4, from math.h.
-			if (y == p.y && x == p.x) { return false; } // p is on top of us
+			if (y == p.y && x == p.x) {
+				// p is on top of us, avoid getting stuck
+				return false;
+			}
 			//DEBUG("%s: %f vs %f", grid::dir_str(dir), abs_atan(p), (M_PI_4));
 			switch (dir) {
-			case grid::DIR_UP:
+			case grid::POS_UP_LEFT:
+				return (y > p.y && x > p.x);
+			case grid::POS_UP_RIGHT:
+				return (y > p.y && x < p.x);
+			case grid::POS_DOWN_LEFT:
+				return (y < p.y && x > p.x);
+			case grid::POS_DOWN_RIGHT:
+				return (y < p.y && x < p.x);
+
+			case grid::POS_UP_CENTER:
 				if (y < p.y) { return false; } // p is below us
 				return abs_atan(p) >= M_PI_4; // p is too far right/left of us
-			case grid::DIR_DOWN:
+			case grid::POS_DOWN_CENTER:
 				if (y > p.y) { return false; } // p is above us
 				return abs_atan(p) >= M_PI_4; // p is too far right/left of us
 
-			case grid::DIR_LEFT:
+			case grid::POS_LEFT:
 				if (x < p.x) { return false; } // p is right of us
 				return abs_atan(p) <= M_PI_4; // p is too far above/below us
-			case grid::DIR_RIGHT:
+			case grid::POS_RIGHT:
 				if (x > p.x) { return false; } // p is left of us
 				return abs_atan(p) <= M_PI_4; // p is too far above/below us
 
-			case grid::DIR_UNKNOWN:
-			case grid::DIR_CURRENT:
+			case grid::POS_CENTER:
+			case grid::POS_UNKNOWN:
+			case grid::POS_CURRENT:
+				ERROR("Internal error: invalid dir %s", grid::pos_str(dir));
 				break;
 			}
 			return false;//???
 		}
 
-		double distance(const point& p) const {
-			long w = p.x - x, h = p.y - y;
-			return sqrt((w * w) + (h * h));
+		/* Not a true 'distance', more of a weighting where smaller is better. */
+		double distance(grid::POS dir, const point& p) const {
+			long w = DISTANCE(p.x, x), h = DISTANCE(p.y, y);
+			switch (dir) {
+			case grid::POS_UP_LEFT:
+			case grid::POS_UP_RIGHT:
+			case grid::POS_DOWN_LEFT:
+			case grid::POS_DOWN_RIGHT:
+				//use a weighting that favors diagonals (where w == h)
+			{
+				double dist = sqrt((w * w) + (h * h));
+				//sqrt again to further decrease dist's importance
+				return sqrt(dist) * DISTANCE(w, h);
+			}
+
+			case grid::POS_UP_CENTER:
+			case grid::POS_DOWN_CENTER:
+			case grid::POS_RIGHT:
+			case grid::POS_LEFT:
+				//use actual distance, diagonals are automatically farther
+				return sqrt((w * w) + (h * h));
+
+			case grid::POS_CENTER:
+			case grid::POS_UNKNOWN:
+			case grid::POS_CURRENT:
+				ERROR("Internal error: invalid dir %s", grid::pos_str(dir));
+				break;
+			}
+			return 0;//???
 		}
 
-		void shift_pos(grid::DIR dir, long max_x, long max_y) {
+		void shift_pos(grid::POS dir, long max_x, long max_y) {
 			switch (dir) {
-			case grid::DIR_UP:
+			case grid::POS_UP_LEFT:
+				// we're looking up left, so move the point down right
+				y += max_y;
+				x += max_x;
+				break;
+			case grid::POS_DOWN_RIGHT:
+				// opposite of UP_LEFT
+				shift_pos(grid::POS_UP_LEFT, -1 * max_x, -1 * max_y);
+				break;
+
+			case grid::POS_UP_RIGHT:
+				// we're looking up right, so move the point down left
+				y += max_y;
+				x -= max_x;
+				break;
+			case grid::POS_DOWN_LEFT:
+				// opposite of UP_RIGHT
+				shift_pos(grid::POS_UP_RIGHT, -1 * max_x, -1 * max_y);
+				break;
+
+			case grid::POS_UP_CENTER:
 				// we're looking up, so move the point down
 				y += max_y;
 				break;
-			case grid::DIR_DOWN:
-				// opposite of DIR_UP
-				shift_pos(grid::DIR_UP, -1 * max_x, -1 * max_y);
+			case grid::POS_DOWN_CENTER:
+				// opposite of UP_CENTER
+				shift_pos(grid::POS_UP_CENTER, -1 * max_x, -1 * max_y);
 				break;
 
-			case grid::DIR_LEFT:
+			case grid::POS_LEFT:
 				// we're looking left, so move the point right
 				x += max_x;
 				break;
-			case grid::DIR_RIGHT:
-				// opposite of DIR_LEFT
-				shift_pos(grid::DIR_LEFT, -1 * max_x, -1 * max_y);
+			case grid::POS_RIGHT:
+				// opposite of LEFT
+				shift_pos(grid::POS_LEFT, -1 * max_x, -1 * max_y);
 				break;
 
-			case grid::DIR_UNKNOWN:
-			case grid::DIR_CURRENT:
+			case grid::POS_CENTER:
+			case grid::POS_UNKNOWN:
+			case grid::POS_CURRENT:
+				ERROR("Internal error: invalid dir %s", grid::pos_str(dir));
 				break;//???
 			}
 		}
@@ -107,13 +169,14 @@ namespace {
 
 	/* Finds and selects the nearest non-active point in the given direction and
 	   returns true, or returns false if none was found. */
-	bool select_nearest_in_direction(grid::DIR dir, const std::vector<point>& pts,
+	bool select_nearest_in_direction(grid::POS dir, const std::vector<point>& pts,
 			size_t active, size_t& select) {
 		// find nearst point that matches the given direction
 		double nearest_dist = 0;
 		long nearest_i = -1;
 		const point& active_pt = pts[active];
-		DEBUG("search %lu for points %s of %ld,%ld:", pts.size()-1, grid::dir_str(dir), active_pt.x, active_pt.y);
+		DEBUG("search %lu for points %s of %ld,%ld:",
+				pts.size()-1, grid::pos_str(dir), active_pt.x, active_pt.y);
 		for (size_t i = 0; i < pts.size(); ++i) {
 			if (i == active) {
 				DEBUG("skip: %ld,%ld", pts[i].x, pts[i].y);
@@ -122,7 +185,7 @@ namespace {
 
 			const point& pt = pts[i];
 			if (active_pt.direction(dir, pt)) {
-				double dist = active_pt.distance(pt);
+				double dist = active_pt.distance(dir, pt);
 				DEBUG("match!: %ld,%ld (dist %.02f)", pts[i].x, pts[i].y, dist);
 				if (nearest_i < 0 || dist < nearest_dist) {
 					nearest_i = i;
@@ -143,34 +206,44 @@ namespace {
 
 	/* When nothing is found in a given direction, this function determines what
 	   the fallback direction ordering should be */
-	grid::DIR fallback_direction(grid::DIR dir) {
+	grid::POS fallback_direction(grid::POS dir) {
 		// go clockwise
 		switch (dir) {
-		case grid::DIR_UP:
-			return grid::DIR_RIGHT;
-		case grid::DIR_RIGHT:
-			return grid::DIR_DOWN;
-		case grid::DIR_DOWN:
-			return grid::DIR_LEFT;
-		case grid::DIR_LEFT:
-			return grid::DIR_UP;
-		case grid::DIR_UNKNOWN:
-		case grid::DIR_CURRENT:
+		case grid::POS_UP_CENTER:
+			return grid::POS_UP_RIGHT;
+		case grid::POS_UP_RIGHT:
+			return grid::POS_RIGHT;
+		case grid::POS_RIGHT:
+			return grid::POS_DOWN_RIGHT;
+		case grid::POS_DOWN_RIGHT:
+			return grid::POS_DOWN_CENTER;
+		case grid::POS_DOWN_CENTER:
+			return grid::POS_DOWN_LEFT;
+		case grid::POS_DOWN_LEFT:
+			return grid::POS_LEFT;
+		case grid::POS_LEFT:
+			return grid::POS_UP_LEFT;
+		case grid::POS_UP_LEFT:
+			return grid::POS_UP_CENTER;
+		case grid::POS_CENTER:
+		case grid::POS_UNKNOWN:
+		case grid::POS_CURRENT:
+			ERROR("Internal error: invalid dir %s", grid::pos_str(dir));
 			break;
 		}
-		return grid::DIR_UP;//???
+		return grid::POS_UP_CENTER;//???
 	}
 }
 
 #define MAX_X(dim) (dim.x + dim.width)
 #define MAX_Y(dim) (dim.y + dim.height)
 
-void neighbor::select(grid::DIR dir, const dim_list_t& all, size_t active, size_t& select) {
+void neighbor::select(grid::POS dir, const dim_list_t& all, size_t active, size_t& select) {
 	if (all.size() <= 1) {
 		select = 0;
 		return;
 	}
-	if (dir == grid::DIR_CURRENT) {
+	if (dir == grid::POS_CURRENT) {
 		select = active;
 		return;
 	}
