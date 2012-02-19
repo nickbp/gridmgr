@@ -79,7 +79,7 @@ namespace {
 
 	bool is_dock_window(Display* disp, Window win) {
 		/* disallow moving/selecting this window if it has type DESKTOP or DOCK.
-		   (avoid messing with the user's desktop components) */
+		   (avoid messing with the user's desktop components, eg taskbars) */
 		bool ret = false;
 		size_t count = 0;
 		static Atom wintype_msg = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
@@ -106,7 +106,7 @@ namespace {
 	}
 
 	bool is_menu_window(Display* disp, Window win) {
-		/* also disallow moving/selecting this window if it has BOTH SKIP_PAGER and SKIP_TASKBAR.
+		/* also disallow moving/selecting this window if it has SKIP_PAGER or SKIP_TASKBAR.
 		   (avoid messing with auxiliary panels and menus) */
 		bool ret = false;
 		size_t count = 0;
@@ -118,20 +118,17 @@ namespace {
 		} else {
 			static Atom skip_pager = XInternAtom(disp, "_NET_WM_STATE_SKIP_PAGER", False),
 				skip_taskbar = XInternAtom(disp, "_NET_WM_STATE_SKIP_TASKBAR", False);
-			bool has_skip_pager = false, has_skip_taskbar = false;
 			for (size_t i = 0; i < count; ++i) {
 				DEBUG("%d state %lu: %d %s",
 						win, i, states[i], XGetAtomName(disp, states[i]));
-				if (states[i] == skip_pager) {
-					has_skip_pager = true;
-				} else if (states[i] == skip_taskbar) {
-					has_skip_taskbar = true;
+				if (states[i] == skip_pager || states[i] == skip_taskbar) {
+					ret = true;
+					if (!config::debug_enabled) {
+						break;
+					}
 				}
 			}
 			x11_util::free_property(states);
-			if (has_skip_pager && has_skip_taskbar) {
-				ret = true;
-			}
 		}
 		return ret;
 	}
