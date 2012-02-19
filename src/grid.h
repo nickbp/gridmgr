@@ -3,7 +3,7 @@
 
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -22,10 +22,14 @@
 #include "pos.h"
 
 namespace grid {
+	/* Selects and makes active the window in the specified direction relative
+	 * to the currently active window. */
+	bool set_window(DIR window);
+
 	/* Selects the active window and moves/resizes it to the requested
-	   position, according to its current state.
-	   Returns true if successful, false otherwise. */
-	bool set_position(POS position);
+	 * position/monitor, according to its current state.
+	 * Returns true if successful, false otherwise. */
+	bool set_position(POS position, DIR monitor);
 }
 
 #endif

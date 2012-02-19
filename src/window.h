@@ -3,7 +3,7 @@
 
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,24 +21,30 @@
 
 #include <X11/Xlib.h>
 
+#include "pos.h"
 #include "dimensions.h"
 
-/*
-  NOTE: This class internally assumes that a new active window won't be
-  selected for the lifetime of the constructed object. Any changes in
-  active windows will NOT be automatically detected!
-*/
+namespace window {
+	/* Finds the nearest window in the given direction and activates it. */
+	bool select_activate(grid::DIR dir);
+}
 
 class ActiveWindow {
- public:
-	ActiveWindow();
+public:
+	ActiveWindow() : disp(NULL), win(NULL) { }
 	virtual ~ActiveWindow();
 
-	bool Sizes(Dimensions& viewport, Dimensions& activewin) const;
-	bool MoveResize(const Dimensions& activewin);
-	bool Maximize();
+	bool Size(Dimensions& activewin);
 
- private:
+	bool MoveResize(const Dimensions& activewin);
+
+	bool Maximize();
+	bool DeFullscreen();
+	bool DeShade();
+
+private:
+	bool init();
+
 	Display* disp;
 	Window* win;
 };

@@ -1,6 +1,6 @@
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 */
 
 #include <getopt.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <time.h>
@@ -26,16 +27,46 @@
 
 #define TIMESTR_MAX 128 // arbitrarily large
 
-void syntax(char* appname) {
+static void syntax(char* appname) {
 	ERROR_RAWDIR("");
 	ERROR_RAWDIR("gridmgr v%s (built %s)",
 		  config::VERSION_STRING,
 		  config::BUILD_DATE);
-	ERROR_RAWDIR("Moves/sizes windows to match 2x2/3x2 grid layouts.");
 	ERROR_RAWDIR("");
-	ERROR_RAWDIR("Usage: %s [options] <position>", appname);
+	ERROR_RAWDIR("Performs one or more of the following, in this order:");
+	ERROR_RAWDIR("- Activate a window adjacent to the current window.");
+#ifdef USE_XINERAMA
+	ERROR_RAWDIR("- Move active window to an adjacent monitor.");
+#endif
+	ERROR_RAWDIR("- Position active window on a grid layout.");
 	ERROR_RAWDIR("");
-	ERROR_RAWDIR("Positions:");
+#ifdef USE_XINERAMA
+	ERROR_RAWDIR("Usage: %s [options] <window/monitor/position> [w/m/p] [w/m/p]", appname);
+#else
+	ERROR_RAWDIR("Usage: %s [options] <window/position> [w/p] [w/p]", appname);
+#endif
+	ERROR_RAWDIR("");
+	ERROR_RAWDIR("Windows (activate adjacent window):");
+	ERROR_RAWDIR("          -------           ");
+	ERROR_RAWDIR("         |  wup  |          ");
+	ERROR_RAWDIR("  ------ + ----- + -------  ");
+	ERROR_RAWDIR(" | wleft |       | wright | ");
+	ERROR_RAWDIR("  ------ + ----- + -------  ");
+	ERROR_RAWDIR("         | wdown |          ");
+	ERROR_RAWDIR("          -------           ");
+#ifdef USE_XINERAMA
+	ERROR_RAWDIR("");
+	ERROR_RAWDIR("Monitors (move window to adjacent monitor):");
+	ERROR_RAWDIR("          -------           ");
+	ERROR_RAWDIR("         |  mup  |          ");
+	ERROR_RAWDIR("  ------ + ----- + -------  ");
+	ERROR_RAWDIR(" | mleft |       | mright | ");
+	ERROR_RAWDIR("  ------ + ----- + -------  ");
+	ERROR_RAWDIR("         | mdown |          ");
+	ERROR_RAWDIR("          -------           ");
+#endif
+	ERROR_RAWDIR("");
+	ERROR_RAWDIR("Positions (position window on grid):");
 	ERROR_RAWDIR("  -----------------------------  ");
 	ERROR_RAWDIR(" | topleft |  top   | topright | ");
 	ERROR_RAWDIR(" | ------- + ------ + -------- | ");
@@ -51,13 +82,69 @@ void syntax(char* appname) {
 	ERROR_RAWDIR("");
 }
 
+static bool str_to_pos(const char* arg, grid::POS& out) {
+	if (strcmp(arg, "topleft") == 0) {
+		out = grid::POS_TOP_LEFT;
+	} else if (strcmp(arg, "top") == 0) {
+		out = grid::POS_TOP_CENTER;
+	} else if (strcmp(arg, "topright") == 0) {
+		out = grid::POS_TOP_RIGHT;
+	} else if (strcmp(arg, "left") == 0) {
+		out = grid::POS_LEFT;
+	} else if (strcmp(arg, "center") == 0) {
+		out = grid::POS_CENTER;
+	} else if (strcmp(arg, "right") == 0) {
+		out = grid::POS_RIGHT;
+	} else if (strcmp(arg, "botleft") == 0) {
+		out = grid::POS_BOT_LEFT;
+	} else if (strcmp(arg, "bottom") == 0 || strcmp(arg, "bot") == 0) {
+		out = grid::POS_BOT_CENTER;
+	} else if (strcmp(arg, "botright") == 0) {
+		out = grid::POS_BOT_RIGHT;
+	} else {
+		return false;
+	}
+	return true;
+}
+
+static bool str_to_win(const char* arg, grid::DIR& out) {
+	if (strcmp(arg, "wup") == 0) {
+		out = grid::DIR_UP;
+	} else if (strcmp(arg, "wleft") == 0) {
+		out = grid::DIR_LEFT;
+	} else if (strcmp(arg, "wright") == 0) {
+		out = grid::DIR_RIGHT;
+	} else if (strcmp(arg, "wdown") == 0) {
+		out = grid::DIR_DOWN;
+	} else {
+		return false;
+	}
+	return true;
+}
+
+static bool str_to_mon(const char* arg, grid::DIR& out) {
+	if (strcmp(arg, "mup") == 0) {
+		out = grid::DIR_UP;
+	} else if (strcmp(arg, "mleft") == 0) {
+		out = grid::DIR_LEFT;
+	} else if (strcmp(arg, "mright") == 0) {
+		out = grid::DIR_RIGHT;
+	} else if (strcmp(arg, "mdown") == 0) {
+		out = grid::DIR_DOWN;
+	} else {
+		return false;
+	}
+	return true;
+}
+
 namespace {
 	enum CMD { CMD_UNKNOWN, CMD_HELP, CMD_POSITION };
 	CMD run_cmd = CMD_UNKNOWN;
-	grid::POS position = grid::POS_UNKNOWN;
+	grid::POS position = grid::POS_CURRENT;
+	grid::DIR monitor = grid::DIR_CURRENT, window = grid::DIR_CURRENT;
 }
 
-bool parse_config(int argc, char* argv[]) {
+static bool parse_config(int argc, char* argv[]) {
 	if (argc == 1) {
 		syntax(argv[0]);
 		return false;
@@ -82,32 +169,32 @@ bool parse_config(int argc, char* argv[]) {
 			//getopt refuses to continue, so handle position manually:
 			for (int i = optind; i < argc; ++i) {
 				const char* arg = argv[i];
-				//debug("%d %d %s", argc, i, arg);
-				if (strcmp(arg, "topleft") == 0) {
-					position = grid::POS_TOP_LEFT;
-				} else if (strcmp(arg, "top") == 0) {
-					position = grid::POS_TOP_CENTER;
-				} else if (strcmp(arg, "topright") == 0) {
-					position = grid::POS_TOP_RIGHT;
-				} else if (strcmp(arg, "left") == 0) {
-					position = grid::POS_LEFT;
-				} else if (strcmp(arg, "center") == 0) {
-					position = grid::POS_CENTER;
-				} else if (strcmp(arg, "right") == 0) {
-					position = grid::POS_RIGHT;
-				} else if (strcmp(arg, "botleft") == 0) {
-					position = grid::POS_BOT_LEFT;
-				} else if (strcmp(arg, "bottom") == 0 || strcmp(arg, "bot") == 0) {
-					position = grid::POS_BOT_CENTER;
-				} else if (strcmp(arg, "botright") == 0) {
-					position = grid::POS_BOT_RIGHT;
+				//DEBUG("%d %d %s", argc, i, arg);
+				grid::POS tmp_pos;
+				grid::DIR tmp_dir;
+				if (str_to_pos(arg, tmp_pos)) {
+					if (position != grid::POS_CURRENT) {
+						ERROR("%s: Multiple positions specified: '%s'", argv[0], argv[i]);
+						syntax(argv[0]);
+						return false;
+					}
+					position = tmp_pos;
+				} else if (str_to_win(arg, tmp_dir)) {
+					if (window != grid::DIR_CURRENT) {
+						ERROR("%s: Multiple windows specified: '%s'", argv[0], argv[i]);
+						syntax(argv[0]);
+						return false;
+					}
+					window = tmp_dir;
+				} else if (str_to_mon(arg, tmp_dir)) {
+					if (monitor != grid::DIR_CURRENT) {
+						ERROR("%s: Multiple monitors specified: '%s'", argv[0], argv[i]);
+						syntax(argv[0]);
+						return false;
+					}
+					monitor = tmp_dir;
 				} else {
-					ERROR("%s: unknown argument: '%s'", argv[0], argv[i]);
-					syntax(argv[0]);
-					return false;
-				}
-				if (run_cmd != CMD_UNKNOWN) {
-					ERROR("%s: misplaced argument: '%s'", argv[0], argv[i]);
+					ERROR("%s: Unknown argument: '%s'", argv[0], argv[i]);
 					syntax(argv[0]);
 					return false;
 				}
@@ -163,21 +250,26 @@ bool parse_config(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
 	if (!parse_config(argc, argv)) {
-		return 1;
+		return EXIT_FAILURE;
 	}
 	switch (run_cmd) {
 	case CMD_HELP:
 		syntax(argv[0]);
-		return 0;
+		return EXIT_SUCCESS;
 	case CMD_POSITION:
-		if (position == grid::POS_UNKNOWN) {
-			ERROR_DIR("INTERNAL ERROR: position command, but position not set!");
-			return 1;
+		// activate window (if specified)
+		if (window != grid::DIR_CURRENT && !grid::set_window(window)) {
+			return EXIT_FAILURE;
 		}
-		return grid::set_position(position) ? 0 : 1;
+		// move window (if specified)
+		if (position != grid::POS_CURRENT || monitor != grid::DIR_CURRENT) {
+			return grid::set_position(position, monitor) ?
+				EXIT_SUCCESS : EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
 	default:
 		ERROR("%s: no command specified", argv[0]);
 		syntax(argv[0]);
-		return 1;
+		return EXIT_FAILURE;
 	}
 }

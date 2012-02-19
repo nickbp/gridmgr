@@ -1,6 +1,6 @@
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "position.h"
+#include <math.h> // round()
+
 #include "config.h"
+#include "position.h"
 
 namespace {
 	inline const char* mode_str(grid::MODE mode) {
@@ -53,7 +55,7 @@ namespace {
 
 /* given window's dimensions, estimate its state (or unknown+unknown)
    (inverse of StateToDim) */
-bool PositionCalc::CurState(State& out) {
+bool PositionCalc::CurState(const Dimensions& viewport, State& out) const {
 	//get window x/y relative to viewport x/y
 	int rel_x = window.x - viewport.x,
 		rel_y = window.y - viewport.y;
@@ -204,12 +206,14 @@ bool PositionCalc::CurState(State& out) {
 	return true;
 }
 
-bool PositionCalc::NextState(const State& cur, grid::POS req_pos, State& out) {
-	if (req_pos == grid::POS_UNKNOWN) {
+bool PositionCalc::NextState(const State& cur, grid::POS req_pos, State& out) const {
+	if (req_pos == grid::POS_UNKNOWN) {// nice to have
 		ERROR("Position '%s' was requested. Internal error?", pos_str(req_pos));
-		return false;// nice to have
+		return false;
 	}
-	if (cur.pos == req_pos) {
+	if (req_pos == grid::POS_CURRENT) {
+		out = cur;
+	} else if (cur.pos == req_pos) {
 		// position is same, so rotate mode
 		out.pos = cur.pos;
 		switch (cur.pos) {
@@ -265,7 +269,8 @@ bool PositionCalc::NextState(const State& cur, grid::POS req_pos, State& out) {
 /* given window's state, calculate its dimensions.
    could have some kind of fancy autogeneration here,
    but there's a very finite number of possible positions (for now?) */
-bool PositionCalc::StateToDim(const State& state, Dimensions& out) {
+bool PositionCalc::StateToDim(const Dimensions& viewport, const State& state,
+		Dimensions& out) const {
 	bool ret = true;
 	long rel_x = 0, rel_y = 0;//coordinates relative to viewport
 	switch (state.mode) {
@@ -452,4 +457,21 @@ bool PositionCalc::StateToDim(const State& state, Dimensions& out) {
 		ERROR("Bad pos=%s + mode=%s", pos_str(state.pos), mode_str(state.mode));
 	}
 	return ret;
+}
+
+void PositionCalc::ViewportToDim(const Dimensions& cur_viewport,
+		const Dimensions& next_viewport, Dimensions& out) const {
+	// just do an exact scaling to the new viewport
+	if (cur_viewport.width == 0 || cur_viewport.height == 0) {//nice to have, avoid div0
+		out = next_viewport;//just throw something together and get out
+		return;
+	}
+	const double ratio_x = next_viewport.width / (double)cur_viewport.width,
+		ratio_y = next_viewport.height / (double)cur_viewport.height;
+
+	// avoid implicit floor to avoid some rounding error:
+	out.x = round((window.x - cur_viewport.x) * ratio_x + next_viewport.x);
+	out.y = round((window.y - cur_viewport.y) * ratio_y + next_viewport.y);
+	out.width = round(window.width * ratio_x);
+	out.height = round(window.height * ratio_y);
 }

@@ -23,18 +23,14 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 SET(SRCS
-  config.in.h
   config.cpp
-  grid.h
   grid.cpp
   main.cpp
-  position.h
+  neighbor.cpp
   position.cpp
-  viewport.h
-  viewport-ewmh.cpp
-  window.h
+  viewport.cpp
+  viewport-imp-ewmh.cpp
   window.cpp
-  x11-util.h
   x11-util.cpp
   )
 configure_file (
@@ -54,7 +50,7 @@ if(USE_XINERAMA)
   message(STATUS "Xinerama multi-monitor support enabled.")
   list(APPEND INCLUDES "${X11_Xinerama_INCLUDE_PATH}")
   list(APPEND LIBS "${X11_Xinerama_LIB}")
-  list(APPEND SRCS viewport-xinerama.cpp)
+  list(APPEND SRCS viewport-imp-xinerama.cpp)
 
 else()
 

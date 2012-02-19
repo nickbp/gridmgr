@@ -1,6 +1,9 @@
+#ifndef GRIDMGR_VIEWPORT_IMP_XINERAMA_H
+#define GRIDMGR_VIEWPORT_IMP_XINERAMA_H
+
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011-2012  Nicholas Parker
+  Copyright (C) 2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -16,37 +19,24 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <vector>
+#include <X11/Xlib.h>
+
 #include "config.h"
+#include "dimensions.h"
 
-#include <stdarg.h>
+#ifndef USE_XINERAMA
+#error "Build configuration error:"
+#error " Shouldn't be building this file if USE_XINERAMA is disabled."
+#endif
 
-namespace config {
-	FILE *fout = stdout, *ferr = stderr;
-	bool debug_enabled = false;
+typedef std::vector<Dimensions> dim_list_t;
 
-	void _debug(const char* format, ...) {
-		if (debug_enabled) {
-			va_list args;
-			va_start(args, format);
-			vfprintf(fout, format, args);
-			va_end(args);
-			fprintf(fout, "\n");
-		}
-	}
-
-	void _log(const char* format, ...) {
-		va_list args;
-		va_start(args, format);
-		vfprintf(fout, format, args);
-		va_end(args);
-		fprintf(fout, "\n");
-	}
-
-	void _error(const char* format, ...) {
-		va_list args;
-		va_start(args, format);
-		vfprintf(ferr, format, args);
-		va_end(args);
-		fprintf(ferr, "\n");
+namespace viewport {
+	namespace xinerama {
+		bool get_viewports(Display* disp, const Dimensions& activewin,
+				dim_list_t& viewports_out, size_t& active_out);
 	}
 }
+
+#endif

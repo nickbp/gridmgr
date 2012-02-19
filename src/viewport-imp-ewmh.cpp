@@ -1,6 +1,6 @@
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -16,18 +16,19 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "viewport.h"
-#include "x11-util.h"
 #include "config.h"
+#include "viewport-imp-ewmh.h"
+#include "x11-util.h"
 
-bool viewport::get_viewport_ewmh(Display* disp,
-		Dimensions& viewport_out) {
+bool viewport::ewmh::get_viewports(Display* disp, const Dimensions& /*activewin*/,
+		dim_list_t& viewports_out, size_t& active_out) {
 	//get current workspace
 	unsigned long cur_workspace;
 	{
 		unsigned long* cur_ptr;
+		static Atom curdesk_msg = XInternAtom(disp, "_NET_CURRENT_DESKTOP", False);
 		if (!(cur_ptr = (unsigned long *)x11_util::get_property(disp, DefaultRootWindow(disp),
-								XA_CARDINAL, "_NET_CURRENT_DESKTOP", NULL))) {
+								XA_CARDINAL, curdesk_msg, NULL))) {
 			ERROR_DIR("unable to retrieve current desktop");
 			return false;
 		}
@@ -37,8 +38,9 @@ bool viewport::get_viewport_ewmh(Display* disp,
 
 	unsigned long* area;
 	size_t area_count = 0;//number of areas returned, one per workspace. each area contains 4 ulongs.
+	static Atom workarea_msg = XInternAtom(disp, "_NET_WORKAREA", False);
 	if (!(area = (unsigned long*)x11_util::get_property(disp, DefaultRootWindow(disp),
-							XA_CARDINAL, "_NET_WORKAREA", &area_count))) {
+							XA_CARDINAL, workarea_msg, &area_count))) {
 		ERROR_DIR("unable to retrieve spanning workarea");
 		return false;
 	}
@@ -53,6 +55,7 @@ bool viewport::get_viewport_ewmh(Display* disp,
 		x11_util::free_property(area);
 		return false;
 	}
+
 	if (config::debug_enabled) {
 		for (size_t i = 0; i < area_count/4; ++i) {
 			if (i == cur_workspace) {
@@ -68,10 +71,16 @@ bool viewport::get_viewport_ewmh(Display* disp,
 	}
 
 	//set current workspace as viewport
-	viewport_out.x = area[cur_workspace*4];
-	viewport_out.y = area[(cur_workspace*4)+1];
-	viewport_out.width = area[(cur_workspace*4)+2];
-	viewport_out.height = area[(cur_workspace*4)+3];
+	viewports_out.clear();//nice to have
+	viewports_out.push_back(Dimensions());
+	active_out = 0;
+
+	Dimensions& v = viewports_out.back();
+	v.x = area[cur_workspace*4];
+	v.y = area[(cur_workspace*4)+1];
+	v.width = area[(cur_workspace*4)+2];
+	v.height = area[(cur_workspace*4)+3];
+
 	x11_util::free_property(area);
 	return true;
 }

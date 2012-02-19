@@ -3,7 +3,7 @@
 
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,22 +19,19 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <X11/Xlib.h>
-
 #include "dimensions.h"
-#include "config.h"
+#include "pos.h"
 
-namespace viewport {
+class ViewportCalc {
+public:
+	ViewportCalc(const Dimensions& activewin)
+		: activewin(activewin) { }
 
-	bool get_viewport_ewmh(Display* disp,
-			Dimensions& viewport_out);
+	bool Viewports(grid::DIR monitor,
+			Dimensions& cur_viewport, Dimensions& next_viewport) const;
 
-#ifdef USE_XINERAMA
-	bool get_viewport_xinerama(Display* disp,
-			const Dimensions& activewin,
-			Dimensions& viewport_out);
-#endif
-
-}
+private:
+	const Dimensions activewin;
+};
 
 #endif

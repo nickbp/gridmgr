@@ -1,6 +1,6 @@
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -16,15 +16,15 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "window.h"
-#include "viewport.h"
-#include "x11-util.h"
 #include "config.h"
+#include "neighbor.h"
+#include "window.h"
+#include "x11-util.h"
 
 #define SOURCE_INDICATION 2 //say that we're a pager or taskbar
 
 namespace {
-	int client_msg(Display* disp, Window win, const char *msg,
+	int _client_msg(Display* disp, Window win, Atom msg,
 			unsigned long data0, unsigned long data1,
 			unsigned long data2, unsigned long data3,
 			unsigned long data4) {
@@ -34,7 +34,7 @@ namespace {
 		event.xclient.type = ClientMessage;
 		event.xclient.serial = 0;
 		event.xclient.send_event = True;
-		event.xclient.message_type = XInternAtom(disp, msg, False);
+		event.xclient.message_type = msg;
 		event.xclient.window = win;
 		event.xclient.format = 32;
 		event.xclient.data.l[0] = data0;
@@ -43,8 +43,8 @@ namespace {
 		event.xclient.data.l[3] = data3;
 		event.xclient.data.l[4] = data4;
 
-		DEBUG("send message_type=%lu, data=(%lu,%lu,%lu,%lu,%lu)",
-				event.xclient.message_type, data0, data1, data2, data3, data4);
+		DEBUG("send message_type=%s, data=(%lu,%lu,%lu,%lu,%lu)",
+				XGetAtomName(disp, msg), data0, data1, data2, data3, data4);
 
 		if (XSendEvent(disp, DefaultRootWindow(disp), False, mask, &event)) {
 			return true;
@@ -54,7 +54,7 @@ namespace {
 		}
 	}
 
-	void print_window(Display* disp, Window win) {
+	inline void print_window(Display* disp, Window win) {
 		if (!config::debug_enabled) { return; }
 		Window root;
 		int x, y;
@@ -67,71 +67,71 @@ namespace {
 		DEBUG("  %dx %dy %uw %uh %ub", x, y, width, height, border);
 	}
 
-	bool check_window_allowed(Display* disp, Window win) {
-		bool ret = true;
-		{
-			/*
-			  disallow moving this window if it has type DESKTOP or DOCK.
-			  (avoid messing with the user's desktop components)
-			*/
-			size_t count = 0;
-			Atom* types;
+	Window* get_active_window(Display* disp) {
+		static Atom actwin_msg = XInternAtom(disp, "_NET_ACTIVE_WINDOW", False);
+		Window* ret = (Window*)x11_util::get_property(disp, DefaultRootWindow(disp),
+				XA_WINDOW, actwin_msg, NULL);
+		if (ret == NULL) {
+			ERROR_DIR("unable to get active window");
+		}
+		return ret;
+	}
+
+	bool is_dock_window(Display* disp, Window win) {
+		/* disallow moving/selecting this window if it has type DESKTOP or DOCK.
+		   (avoid messing with the user's desktop components) */
+		bool ret = false;
+		size_t count = 0;
+		static Atom wintype_msg = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
+		Atom* types = (Atom*)x11_util::get_property(disp, win, XA_ATOM, wintype_msg, &count);
+		if (types == NULL) {
+			ERROR_DIR("couldn't get window types");
+			//assume window types are fine, keep going
+		} else {
 			static Atom desktop_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DESKTOP", False),
 				dock_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DOCK", False);
-
-			if (!(types = (Atom*)x11_util::get_property(disp, win,
-									XA_ATOM, "_NET_WM_WINDOW_TYPE", &count))) {
-				ERROR_DIR("couldn't get window types");
-				//assume window types are allowed, keep going
-			} else {
-				for (size_t i = 0; i < count; ++i) {
-					DEBUG("type %lu: %d %s",
-							i, types[i], XGetAtomName(disp, types[i]));
-					if (types[i] == desktop_type || types[i] == dock_type) {
-						ret = false;
-						if (!config::debug_enabled) {
-							break;
-						}
+			for (size_t i = 0; i < count; ++i) {
+				DEBUG("%d type %lu: %d %s",
+						win, i, types[i], XGetAtomName(disp, types[i]));
+				if (types[i] == desktop_type || types[i] == dock_type) {
+					ret = true;
+					if (!config::debug_enabled) {
+						break;
 					}
 				}
-				x11_util::free_property(types);
 			}
+			x11_util::free_property(types);
 		}
+		return ret;
+	}
 
-		{
-			/*
-			  also disallow moving this window if it has BOTH the SKIP_PAGER and SKIP_TASKBAR.
-			  (avoid messing with auxiliary panels and menus)
-			*/
-			size_t count = 0;
-			Atom* states;
+	bool is_menu_window(Display* disp, Window win) {
+		/* also disallow moving/selecting this window if it has BOTH SKIP_PAGER and SKIP_TASKBAR.
+		   (avoid messing with auxiliary panels and menus) */
+		bool ret = false;
+		size_t count = 0;
+		static Atom state_msg = XInternAtom(disp, "_NET_WM_STATE", False);
+		Atom* states = (Atom*)x11_util::get_property(disp, win, XA_ATOM, state_msg, &count);
+		if (states == NULL) {
+			ERROR_DIR("couldn't get window states");
+			//assume window states are fine, keep going
+		} else {
 			static Atom skip_pager = XInternAtom(disp, "_NET_WM_STATE_SKIP_PAGER", False),
 				skip_taskbar = XInternAtom(disp, "_NET_WM_STATE_SKIP_TASKBAR", False);
-
-			if (!(states = (Atom*)x11_util::get_property(disp, win,
-									XA_ATOM, "_NET_WM_STATE", &count))) {
-				ERROR_DIR("couldn't get window states");
-				//assume window states are allowed, keep going
-			} else {
-				bool has_skip_pager = false, has_skip_taskbar = false;
-				for (size_t i = 0; i < count; ++i) {
-					DEBUG("state %lu: %d %s",
-							i, states[i], XGetAtomName(disp, states[i]));
-					if (states[i] == skip_pager) {
-						has_skip_pager = true;
-					} else if (states[i] == skip_taskbar) {
-						has_skip_taskbar = true;
-					}
-				}
-				x11_util::free_property(states);
-				if (has_skip_pager && has_skip_taskbar) {
-					ret = false;
+			bool has_skip_pager = false, has_skip_taskbar = false;
+			for (size_t i = 0; i < count; ++i) {
+				DEBUG("%d state %lu: %d %s",
+						win, i, states[i], XGetAtomName(disp, states[i]));
+				if (states[i] == skip_pager) {
+					has_skip_pager = true;
+				} else if (states[i] == skip_taskbar) {
+					has_skip_taskbar = true;
 				}
 			}
-		}
-
-		if (!ret) {
-			LOG_DIR("Active window is a desktop or dock. Ignoring move request.");
+			x11_util::free_property(states);
+			if (has_skip_pager && has_skip_taskbar) {
+				ret = true;
+			}
 		}
 		return ret;
 	}
@@ -216,71 +216,93 @@ namespace {
 		return true;
 	}
 
-	bool defullscreen_deshade_window(Display* disp, Window win) {
-		/*
-		  this disagrees with docs, which say that we should be using a
-		  _NET_WM_STATE_DISABLE atom in data[0]. but that apparently doesn't
-		  work in practice, but '0' does. (and '1' works for ENABLE)
-		*/
-
-		if (!client_msg(disp, win, "_NET_WM_STATE",
-						0,//1 = enable state(s), 0 = disable state(s)
-						XInternAtom(disp, "_NET_WM_STATE_SHADED", False),
-						XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False),
-						SOURCE_INDICATION, 0)) {
-			ERROR_DIR("couldn't unshade/defullscreen");
+	bool activate_window(Display* disp, Window curactive, Window newactive) {
+		static Atom active_msg = XInternAtom(disp, "_NET_ACTIVE_WINDOW", False);
+		if (!_client_msg(disp, newactive, active_msg,
+						SOURCE_INDICATION, CurrentTime, curactive, 0, 0)) {
+			ERROR_DIR("couldn't activate");
 			return false;
 		}
 		return true;
 	}
 
-	bool maximize_window(Display* disp, Window win, bool maximize) {
+	bool set_window_state(Display* disp, Window win, Atom state1, Atom state2, bool enable) {
 		/*
 		  this disagrees with docs, which say that we should be using a
 		  _NET_WM_STATE_DISABLE/_ENABLE atom in data[0]. That apparently doesn't
 		  work in practice, but '0'/'1' do.
 		*/
 
-		int val = (maximize) ? 1 : 0;//just to be explicit
-		if (!client_msg(disp, win, "_NET_WM_STATE",
-						val,//1 = enable state(s), 0 = disable state(s)
-						XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_VERT", False),
-						XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_HORZ", False),
-						SOURCE_INDICATION, 0)) {
-			if (maximize) {
-				ERROR_DIR("couldn't maximize");
-			} else {
-				ERROR_DIR("couldn't demaximize");
-			}
-			return false;
-		}
-
-		return true;
+		int val = (enable) ? 1 : 0;// just to be explicit
+		static Atom state_msg = XInternAtom(disp, "_NET_WM_STATE", False);
+		return _client_msg(disp, win, state_msg,
+				val, state1, state2, SOURCE_INDICATION, 0);
 	}
 
-	bool get_viewport(Display* disp, const Dimensions& activewin,
-			Dimensions& viewport_out) {
-#ifdef USE_XINERAMA
-		//try xinerama, fall back to ewmh if xinerama is unavailable
-		return viewport::get_viewport_xinerama(disp, activewin, viewport_out) ||
-			viewport::get_viewport_ewmh(disp, viewport_out);
-#else
-		//xinerama disabled; just do ewmh
-		return viewport::get_viewport_ewmh(disp, viewport_out);
-#endif
+	bool maximize_window(Display* disp, Window win, bool enable) {
+		static Atom max_vert = XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_VERT", False),
+			max_horiz = XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+		return set_window_state(disp, win, max_vert, max_horiz, enable);
 	}
 }
 
-ActiveWindow::ActiveWindow() {
-	if (!(disp = XOpenDisplay(NULL))) {
+bool window::select_activate(grid::DIR dir) {
+	Display* disp = XOpenDisplay(NULL);
+	if (disp == NULL) {
 		ERROR_DIR("unable to get display");
-		return;
+		return false;
 	}
 
-	if (!(win = (Window*)x11_util::get_property(disp, DefaultRootWindow(disp),
-							XA_WINDOW, "_NET_ACTIVE_WINDOW", NULL))) {
-		ERROR_DIR("unable to get active window");
+	std::vector<Window> wins;
+
+	{
+		size_t win_count = 0;
+		static Atom clientlist_msg = XInternAtom(disp, "_NET_CLIENT_LIST", False);
+		Window* all_wins = (Window*)x11_util::get_property(disp, DefaultRootWindow(disp),
+				XA_WINDOW, clientlist_msg, &win_count);
+		if (all_wins == NULL || win_count == 0) {
+			ERROR_DIR("unable to get list of windows");
+			if (all_wins != NULL) {
+				x11_util::free_property(all_wins);
+			}
+			XCloseDisplay(disp);
+			return false;
+		}
+		// only select normal windows, ignore docks and menus
+		for (size_t i = 0; i < win_count; ++i) {
+			if (!is_dock_window(disp, all_wins[i]) && !is_menu_window(disp, all_wins[i])) {
+				wins.push_back(all_wins[i]);
+			}
+		}
+		x11_util::free_property(all_wins);
 	}
+
+	size_t active_window = 0;
+	dim_list_t all_windows;
+	{
+		Window* active = get_active_window(disp);
+		if (active == NULL) {
+			XCloseDisplay(disp);
+			return false;
+		}
+		for (size_t i = 0; i < wins.size(); ++i) {
+			if (wins[i] == *active) {
+				active_window = i;
+				DEBUG_DIR("ACTIVE:");
+			}
+			all_windows.push_back(Dimensions());
+			get_window_size(disp, wins[i], &all_windows.back(), NULL, NULL);
+		}
+		x11_util::free_property(active);
+	}
+
+	size_t next_window;
+	neighbor::select(dir, all_windows, active_window, next_window);
+
+	bool ok = activate_window(disp, wins[active_window], wins[next_window]);
+
+	XCloseDisplay(disp);
+	return ok;
 }
 
 ActiveWindow::~ActiveWindow() {
@@ -292,15 +314,31 @@ ActiveWindow::~ActiveWindow() {
 	}
 }
 
-#define CHECK_STATE() if (disp == NULL || win == NULL) { \
-		ERROR_DIR("unable to initialize active window"); \
-		return false; \
+bool ActiveWindow::init() {
+	if (disp == NULL) {
+		disp = XOpenDisplay(NULL);
+		if (disp == NULL) {
+			ERROR_DIR("unable to get display");
+			return false;
+		}
 	}
 
-bool ActiveWindow::Sizes(Dimensions& viewport, Dimensions& activewin) const {
-	CHECK_STATE();
+	if (win == NULL) {
+		win = get_active_window(disp);
+		if (win == NULL) {
+			return false;
+		}
+	}
+	return true;
+}
 
-	if (!check_window_allowed(disp, *win)) {
+bool ActiveWindow::Size(Dimensions& activewin) {
+	if (!init()) {
+		return false;
+	}
+
+	if (is_dock_window(disp, *win) || is_menu_window(disp, *win)) {
+		LOG_DIR("Active window is a desktop or dock. Ignoring move request.");
 		return false;
 	}
 
@@ -309,28 +347,16 @@ bool ActiveWindow::Sizes(Dimensions& viewport, Dimensions& activewin) const {
 		return false;
 	}
 
-	/*
-	  special case: if the active window is fullscreen, the desktop workarea is
-	  wrong (ie the obscured taskbar extents aren't included). get around this
-	  by unfullscreening the window first (if applicable). but return the
-	  window's dimensions from when it was fullscreened/shaded.
-	*/
-	defullscreen_deshade_window(disp, *win);//disregard failure
-
-	if (!get_viewport(disp, activewin, viewport)) {
-		ERROR_DIR("unable to get viewport dimensions");
-		return false;
-	}
-
-	DEBUG("viewport %dx %dy %luw %luh, activewin %dx %dy %luw %luh",
-			viewport.x, viewport.y, viewport.width, viewport.height,
+	DEBUG("activewin %dx %dy %luw %luh",
 			activewin.x, activewin.y, activewin.width, activewin.height);
 
 	return true;
 }
 
 bool ActiveWindow::MoveResize(const Dimensions& activewin) {
-	CHECK_STATE();
+	if (!init()) {
+		return false;
+	}
 
 	unsigned int margin_width, margin_height;
 	if (!get_window_size(disp, *win, NULL, &margin_width, &margin_height)) {
@@ -338,7 +364,10 @@ bool ActiveWindow::MoveResize(const Dimensions& activewin) {
 	}
 
 	//demaximize the window before attempting to move it
-	maximize_window(disp, *win, false);//disregard failure
+	if (!maximize_window(disp, *win, false)) {
+		ERROR_DIR("couldn't demaximize");
+		//disregard failure
+	}
 
 	unsigned long new_interior_width = activewin.width - margin_width,
 		new_interior_height = activewin.height - margin_height;
@@ -359,7 +388,37 @@ bool ActiveWindow::MoveResize(const Dimensions& activewin) {
 }
 
 bool ActiveWindow::Maximize() {
-	CHECK_STATE();
+	if (!init()) {
+		return false;
+	}
 
-	return maximize_window(disp, *win, true);
+	if (!maximize_window(disp, *win, true)) {
+		ERROR_DIR("couldn't maximize");
+		return false;
+	}
+	return true;
+}
+bool ActiveWindow::DeFullscreen() {
+	if (!init()) {
+		return false;
+	}
+
+	static Atom fs = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
+	if (!set_window_state(disp, *win, fs, 0, false)) {
+		ERROR_DIR("couldn't defullscreen");
+		return false;
+	}
+	return true;
+}
+bool ActiveWindow::DeShade() {
+	if (!init()) {
+		return false;
+	}
+
+	static Atom shade = XInternAtom(disp, "_NET_WM_STATE_SHADED", False);
+	if (!set_window_state(disp, *win, shade, 0, false)) {
+		ERROR_DIR("couldn't deshade");
+		return false;
+	}
+	return true;
 }

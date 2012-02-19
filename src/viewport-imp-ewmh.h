@@ -1,6 +1,9 @@
+#ifndef GRIDMGR_VIEWPORT_IMP_EWMH_H
+#define GRIDMGR_VIEWPORT_IMP_EWMH_H
+
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011-2012  Nicholas Parker
+  Copyright (C) 2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -16,37 +19,18 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
+#include <vector>
+#include <X11/Xlib.h>
 
-#include <stdarg.h>
+#include "dimensions.h"
 
-namespace config {
-	FILE *fout = stdout, *ferr = stderr;
-	bool debug_enabled = false;
+typedef std::vector<Dimensions> dim_list_t;
 
-	void _debug(const char* format, ...) {
-		if (debug_enabled) {
-			va_list args;
-			va_start(args, format);
-			vfprintf(fout, format, args);
-			va_end(args);
-			fprintf(fout, "\n");
-		}
-	}
-
-	void _log(const char* format, ...) {
-		va_list args;
-		va_start(args, format);
-		vfprintf(fout, format, args);
-		va_end(args);
-		fprintf(fout, "\n");
-	}
-
-	void _error(const char* format, ...) {
-		va_list args;
-		va_start(args, format);
-		vfprintf(ferr, format, args);
-		va_end(args);
-		fprintf(ferr, "\n");
+namespace viewport {
+	namespace ewmh {
+		bool get_viewports(Display* disp, const Dimensions& activewin,
+				dim_list_t& viewports_out, size_t& active_out);
 	}
 }
+
+#endif

@@ -3,7 +3,7 @@
 
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -32,31 +32,39 @@ namespace grid {
 }
 
 struct State {
+	State() : pos(grid::POS_UNKNOWN), mode(grid::MODE_UNKNOWN) { }
+
 	grid::POS pos;
 	grid::MODE mode;
 };
 
 class PositionCalc {
- public:
-	PositionCalc(const Dimensions& viewport,
-		 const Dimensions& window)
-	 : viewport(viewport), window(window) { }
+public:
+	PositionCalc(const Dimensions& window)
+		: window(window) { }
 
 	/* Produces an autodetected state of this window using its current
 	 * coordinates. Returns true on success, else false. */
-	bool CurState(State& cur_state);
+	bool CurState(const Dimensions& viewport, State& cur_state) const;
 
 	/* Given a current state and requested position for the window, calculates
 	 * its next state. Returns true on success, else false. */
 	bool NextState(const State& cur_state, grid::POS req_pos,
-			State& next_state);
+			State& next_state) const;
 
 	/* Given a state for the window, calculates the dimensions of that position.
 	 * Returns true on success, else false. */
-	bool StateToDim(const State& state, Dimensions& out);
+	bool StateToDim(const Dimensions& viewport, const State& state,
+			Dimensions& out) const;
 
- private:
-	const Dimensions viewport, window;
+	/* Special case of StateToDim: Given the current viewport and next viewport
+	 * for a window with no autodetected state, calculates a reasonable location
+	 * in the new viewport. */
+	void ViewportToDim(const Dimensions& cur_viewport,
+			const Dimensions& next_viewport, Dimensions& out) const;
+
+private:
+	const Dimensions window;
 };
 
 #endif

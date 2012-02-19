@@ -3,7 +3,7 @@
 
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,12 +19,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <stdint.h>
 
 namespace x11_util {
 	unsigned char* get_property(Display *disp, Window win,
-			Atom xa_prop_type, const char* prop_name, size_t* out_count);
+			Atom xa_prop_type, Atom xa_prop_name, size_t* out_count);
 	void free_property(void* prop);
 }
 

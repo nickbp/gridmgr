@@ -1,6 +1,6 @@
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -16,18 +16,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "x11-util.h"
 #include "config.h"
+#include "x11-util.h"
 
 #define MAX_PROPERTY_VALUE_LEN 4096
 
 unsigned char* x11_util::get_property(Display *disp, Window win,
-		Atom xa_prop_type, const char* prop_name, size_t* out_count) {
-	Atom xa_prop_name = XInternAtom(disp, prop_name, false);
-	if (xa_prop_name == None) {
-		ERROR("Atom not found for %s", prop_name);
-		return NULL;
-	}
+		Atom xa_prop_type, Atom xa_prop_name, size_t* out_count) {
 	Atom xa_ret_type;
 	int ret_format;
 	unsigned long ret_nitems, ret_bytes_after;
@@ -41,8 +36,10 @@ unsigned char* x11_util::get_property(Display *disp, Window win,
 	if (XGetWindowProperty(disp, win, xa_prop_name, 0, MAX_PROPERTY_VALUE_LEN / 4, false,
 					xa_prop_type, &xa_ret_type, &ret_format,
 					&ret_nitems, &ret_bytes_after, &ret_prop) != Success) {
-		ERROR("Cannot get %s property.", prop_name);
+		ERROR("Cannot get property %d/%s.", xa_prop_name, XGetAtomName(disp, xa_prop_name));
 		return NULL;
+	} else {
+		DEBUG("Property %d/%s -> %lu items", xa_prop_name, XGetAtomName(disp, xa_prop_name), ret_nitems);
 	}
 
 	if (xa_ret_type != xa_prop_type) {
@@ -55,8 +52,8 @@ unsigned char* x11_util::get_property(Display *disp, Window win,
 		} else {
 			char *req = XGetAtomName(disp, xa_prop_type),
 				*got = XGetAtomName(disp, xa_ret_type);
-			ERROR("Invalid type of %s property: req %s, got %s",
-					prop_name, req, got);
+			ERROR("Invalid type of property %d/%s: req %s, got %s",
+					xa_prop_name, XGetAtomName(disp, xa_prop_name), req, got);
 			XFree(req);
 			XFree(got);
 		}

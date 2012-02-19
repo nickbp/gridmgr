@@ -3,7 +3,7 @@
 
 /*
   gridmgr - Organizes windows according to a grid.
-  Copyright (C) 2011  Nicholas Parker
+  Copyright (C) 2011-2012  Nicholas Parker
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -57,12 +57,14 @@ namespace config {
 	static const char VERSION_STRING[] = "@gridmgr_VERSION_MAJOR@.@gridmgr_VERSION_MINOR@.@gridmgr_VERSION_PATCH@";
 	static const char BUILD_DATE[] = __TIMESTAMP__;
 
-	extern bool debug_enabled;
+	/* DONT USE THESE, use DEBUG()/LOG()/ERROR() instead: */
+
 	extern FILE *fout;
 	extern FILE *ferr;
 
-	/* DONT USE THESE, use DEBUG()/LOG()/ERROR() instead. */
+	extern bool debug_enabled;
 	void _debug(const char* format, ...);
+
 	void _log(const char* format, ...);
 	void _error(const char* format, ...);
 }
