@@ -23,48 +23,48 @@
 #include "dimensions.h"
 
 namespace grid {
-	enum MODE {
-		MODE_UNKNOWN,
-		MODE_TWO_COL,// 2x2 (not applicable for center col positions)
-		MODE_THREE_COL_S,// 3x2 small: each position filling 1 column
-		MODE_THREE_COL_L// 3x2 large: sides filling 2 columns and center filling full width
-	};
+    enum MODE {
+        MODE_UNKNOWN,
+        MODE_TWO_COL,// 2x2 (not applicable for center col positions)
+        MODE_THREE_COL_S,// 3x2 small: each position filling 1 column
+        MODE_THREE_COL_L// 3x2 large: sides filling 2 columns and center filling full width
+    };
 }
 
 struct State {
-	State() : pos(grid::POS_UNKNOWN), mode(grid::MODE_UNKNOWN) { }
+    State() : pos(grid::POS_UNKNOWN), mode(grid::MODE_UNKNOWN) { }
 
-	grid::POS pos;
-	grid::MODE mode;
+    grid::POS pos;
+    grid::MODE mode;
 };
 
 class PositionCalc {
 public:
-	PositionCalc(const Dimensions& window)
-		: window(window) { }
+    PositionCalc(const Dimensions& window)
+        : window(window) { }
 
-	/* Produces an autodetected state of this window using its current
-	 * coordinates. Returns true on success, else false. */
-	bool CurState(const Dimensions& viewport, State& cur_state) const;
+    /* Produces an autodetected state of this window using its current
+     * coordinates. Returns true on success, else false. */
+    bool CurState(const Dimensions& viewport, State& cur_state) const;
 
-	/* Given a current state and requested position for the window, calculates
-	 * its next state. Returns true on success, else false. */
-	bool NextState(const State& cur_state, grid::POS req_pos,
-			State& next_state) const;
+    /* Given a current state and requested position for the window, calculates
+     * its next state. Returns true on success, else false. */
+    bool NextState(const State& cur_state, grid::POS req_pos,
+            State& next_state) const;
 
-	/* Given a state for the window, calculates the dimensions of that position.
-	 * Returns true on success, else false. */
-	bool StateToDim(const Dimensions& viewport, const State& state,
-			Dimensions& out) const;
+    /* Given a state for the window, calculates the dimensions of that position.
+     * Returns true on success, else false. */
+    bool StateToDim(const Dimensions& viewport, const State& state,
+            Dimensions& out) const;
 
-	/* Special case of StateToDim: Given the current viewport and next viewport
-	 * for a window with no autodetected state, calculates a reasonable location
-	 * in the new viewport. */
-	void ViewportToDim(const Dimensions& cur_viewport,
-			const Dimensions& next_viewport, Dimensions& out) const;
+    /* Special case of StateToDim: Given the current viewport and next viewport
+     * for a window with no autodetected state, calculates a reasonable location
+     * in the new viewport. */
+    void ViewportToDim(const Dimensions& cur_viewport,
+            const Dimensions& next_viewport, Dimensions& out) const;
 
 private:
-	const Dimensions window;
+    const Dimensions window;
 };
 
 #endif

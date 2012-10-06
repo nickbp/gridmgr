@@ -20,12 +20,12 @@
 */
 
 struct Dimensions {
-	//position of the top left corner of the screen
-	long x;
-	long y;
-	//width,height are 'exterior' size, including any borders/decorations
-	unsigned long width;
-	unsigned long height;
+    //position of the top left corner of the screen
+    long x;
+    long y;
+    //width,height are 'exterior' size, including any borders/decorations
+    unsigned long width;
+    unsigned long height;
 };
 
 #endif

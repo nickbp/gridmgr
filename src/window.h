@@ -25,28 +25,28 @@
 #include "dimensions.h"
 
 namespace window {
-	/* Finds the nearest window in the given direction and activates it. */
-	bool select_activate(grid::POS dir);
+    /* Finds the nearest window in the given direction and activates it. */
+    bool select_activate(grid::POS dir);
 }
 
 class ActiveWindow {
 public:
-	ActiveWindow() : disp(NULL), win(NULL) { }
-	virtual ~ActiveWindow();
+    ActiveWindow() : disp(NULL), win(NULL) { }
+    virtual ~ActiveWindow();
 
-	bool Size(Dimensions& activewin);
+    bool Size(Dimensions& activewin);
 
-	bool MoveResize(const Dimensions& activewin);
+    bool MoveResize(const Dimensions& activewin);
 
-	bool Maximize();
-	bool DeFullscreen();
-	bool DeShade();
+    bool Maximize();
+    bool DeFullscreen();
+    bool DeShade();
 
 private:
-	bool init();
+    bool init();
 
-	Display* disp;
-	Window* win;
+    Display* disp;
+    Window* win;
 };
 
 #endif

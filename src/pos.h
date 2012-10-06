@@ -20,42 +20,42 @@
 */
 
 namespace grid {
-	/* These are the various available positions which may be set.
-	 * CURRENT is "use the current position", useful when only switching monitors */
-	enum POS {
-		POS_UNKNOWN, POS_CURRENT,
-		POS_UP_LEFT, POS_UP_CENTER, POS_UP_RIGHT,
-		POS_LEFT, POS_CENTER, POS_RIGHT,
-		POS_DOWN_LEFT, POS_DOWN_CENTER, POS_DOWN_RIGHT
-	};
+    /* These are the various available positions which may be set.
+     * CURRENT is "use the current position", useful when only switching monitors */
+    enum POS {
+        POS_UNKNOWN, POS_CURRENT,
+        POS_UP_LEFT, POS_UP_CENTER, POS_UP_RIGHT,
+        POS_LEFT, POS_CENTER, POS_RIGHT,
+        POS_DOWN_LEFT, POS_DOWN_CENTER, POS_DOWN_RIGHT
+    };
 
-	inline const char* pos_str(POS pos) {
-		switch (pos) {
-		case POS_UNKNOWN:
-			return "UNKNOWN";
-		case POS_CURRENT:
-			return "CURRENT";
-		case POS_UP_LEFT:
-			return "UP_LEFT";
-		case POS_UP_CENTER:
-			return "UP_CENTER";
-		case POS_UP_RIGHT:
-			return "UP_RIGHT";
-		case POS_LEFT:
-			return "LEFT";
-		case POS_CENTER:
-			return "CENTER";
-		case POS_RIGHT:
-			return "RIGHT";
-		case POS_DOWN_LEFT:
-			return "DOWN_LEFT";
-		case POS_DOWN_CENTER:
-			return "DOWN_CENTER";
-		case POS_DOWN_RIGHT:
-			return "DOWN_RIGHT";
-		}
-		return "???";
-	}
+    inline const char* pos_str(POS pos) {
+        switch (pos) {
+        case POS_UNKNOWN:
+            return "UNKNOWN";
+        case POS_CURRENT:
+            return "CURRENT";
+        case POS_UP_LEFT:
+            return "UP_LEFT";
+        case POS_UP_CENTER:
+            return "UP_CENTER";
+        case POS_UP_RIGHT:
+            return "UP_RIGHT";
+        case POS_LEFT:
+            return "LEFT";
+        case POS_CENTER:
+            return "CENTER";
+        case POS_RIGHT:
+            return "RIGHT";
+        case POS_DOWN_LEFT:
+            return "DOWN_LEFT";
+        case POS_DOWN_CENTER:
+            return "DOWN_CENTER";
+        case POS_DOWN_RIGHT:
+            return "DOWN_RIGHT";
+        }
+        return "???";
+    }
 }
 
 #endif

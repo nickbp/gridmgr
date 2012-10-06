@@ -27,10 +27,10 @@
 typedef std::vector<Dimensions> dim_list_t;
 
 namespace viewport {
-	namespace ewmh {
-		bool get_viewports(Display* disp, const Dimensions& activewin,
-				dim_list_t& viewports_out, size_t& active_out);
-	}
+    namespace ewmh {
+        bool get_viewports(Display* disp, const Dimensions& activewin,
+                dim_list_t& viewports_out, size_t& active_out);
+    }
 }
 
 #endif

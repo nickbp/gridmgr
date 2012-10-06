@@ -24,9 +24,9 @@
 #include <stdint.h>
 
 namespace x11_util {
-	unsigned char* get_property(Display *disp, Window win,
-			Atom xa_prop_type, Atom xa_prop_name, size_t* out_count);
-	void free_property(void* prop);
+    unsigned char* get_property(Display *disp, Window win,
+            Atom xa_prop_type, Atom xa_prop_name, size_t* out_count);
+    void free_property(void* prop);
 }
 
 #endif

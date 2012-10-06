@@ -22,14 +22,14 @@
 #include "pos.h"
 
 namespace grid {
-	/* Selects and makes active the window in the specified direction relative
-	 * to the currently active window. */
-	bool set_active(POS window);
+    /* Selects and makes active the window in the specified direction relative
+     * to the currently active window. */
+    bool set_active(POS window);
 
-	/* Selects the active window and moves/resizes it to the requested
-	 * position/monitor, according to its current state.
-	 * Returns true if successful, false otherwise. */
-	bool set_position(POS gridpos, POS monitor);
+    /* Selects the active window and moves/resizes it to the requested
+     * position/monitor, according to its current state.
+     * Returns true if successful, false otherwise. */
+    bool set_position(POS gridpos, POS monitor);
 }
 
 #endif

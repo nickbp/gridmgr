@@ -49,24 +49,24 @@
 #cmakedefine USE_XINERAMA
 
 namespace config {
-	static const int
-		VERSION_MAJOR = @gridmgr_VERSION_MAJOR@,
-		VERSION_MINOR = @gridmgr_VERSION_MINOR@,
-		VERSION_PATCH = @gridmgr_VERSION_PATCH@;
+    static const int
+        VERSION_MAJOR = @gridmgr_VERSION_MAJOR@,
+        VERSION_MINOR = @gridmgr_VERSION_MINOR@,
+        VERSION_PATCH = @gridmgr_VERSION_PATCH@;
 
-	static const char VERSION_STRING[] = "@gridmgr_VERSION_MAJOR@.@gridmgr_VERSION_MINOR@.@gridmgr_VERSION_PATCH@";
-	static const char BUILD_DATE[] = __TIMESTAMP__;
+    static const char VERSION_STRING[] = "@gridmgr_VERSION_MAJOR@.@gridmgr_VERSION_MINOR@.@gridmgr_VERSION_PATCH@";
+    static const char BUILD_DATE[] = __TIMESTAMP__;
 
-	/* DONT USE THESE, use DEBUG()/LOG()/ERROR() instead: */
+    /* DONT USE THESE, use DEBUG()/LOG()/ERROR() instead: */
 
-	extern FILE *fout;
-	extern FILE *ferr;
+    extern FILE *fout;
+    extern FILE *ferr;
 
-	extern bool debug_enabled;
-	void _debug(const char* format, ...);
+    extern bool debug_enabled;
+    void _debug(const char* format, ...);
 
-	void _log(const char* format, ...);
-	void _error(const char* format, ...);
+    void _log(const char* format, ...);
+    void _error(const char* format, ...);
 }
 
 #endif

@@ -24,14 +24,14 @@
 
 class ViewportCalc {
 public:
-	ViewportCalc(const Dimensions& activewin)
-		: activewin(activewin) { }
+    ViewportCalc(const Dimensions& activewin)
+        : activewin(activewin) { }
 
-	bool Viewports(grid::POS monitor,
-			Dimensions& cur_viewport, Dimensions& next_viewport) const;
+    bool Viewports(grid::POS monitor,
+            Dimensions& cur_viewport, Dimensions& next_viewport) const;
 
 private:
-	const Dimensions activewin;
+    const Dimensions activewin;
 };
 
 #endif

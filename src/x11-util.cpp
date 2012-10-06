@@ -22,51 +22,51 @@
 #define MAX_PROPERTY_VALUE_LEN 4096
 
 unsigned char* x11_util::get_property(Display *disp, Window win,
-		Atom xa_prop_type, Atom xa_prop_name, size_t* out_count) {
-	Atom xa_ret_type;
-	int ret_format;
-	unsigned long ret_nitems, ret_bytes_after;
-	unsigned char* ret_prop;
+        Atom xa_prop_type, Atom xa_prop_name, size_t* out_count) {
+    Atom xa_ret_type;
+    int ret_format;
+    unsigned long ret_nitems, ret_bytes_after;
+    unsigned char* ret_prop;
 
-	/* MAX_PROPERTY_VALUE_LEN / 4 explanation (XGetWindowProperty manpage):
-	 *
-	 * long_length = Specifies the length in 32-bit multiples of the
-	 *               data to be retrieved.
-	 */
-	if (XGetWindowProperty(disp, win, xa_prop_name, 0, MAX_PROPERTY_VALUE_LEN / 4, false,
-					xa_prop_type, &xa_ret_type, &ret_format,
-					&ret_nitems, &ret_bytes_after, &ret_prop) != Success) {
-		ERROR("Cannot get property %d/%s.", xa_prop_name, XGetAtomName(disp, xa_prop_name));
-		return NULL;
-	} else {
-		DEBUG("Property %d/%s -> %lu items", xa_prop_name, XGetAtomName(disp, xa_prop_name), ret_nitems);
-	}
+    /* MAX_PROPERTY_VALUE_LEN / 4 explanation (XGetWindowProperty manpage):
+     *
+     * long_length = Specifies the length in 32-bit multiples of the
+     *               data to be retrieved.
+     */
+    if (XGetWindowProperty(disp, win, xa_prop_name, 0, MAX_PROPERTY_VALUE_LEN / 4, false,
+                    xa_prop_type, &xa_ret_type, &ret_format,
+                    &ret_nitems, &ret_bytes_after, &ret_prop) != Success) {
+        ERROR("Cannot get property %d/%s.", xa_prop_name, XGetAtomName(disp, xa_prop_name));
+        return NULL;
+    } else {
+        DEBUG("Property %d/%s -> %lu items", xa_prop_name, XGetAtomName(disp, xa_prop_name), ret_nitems);
+    }
 
-	if (xa_ret_type != xa_prop_type) {
-		if (xa_ret_type == None) {
-			// avoid crash on XGetAtomName(None)
-			char *req = XGetAtomName(disp, xa_prop_type);
-			//not necessarily an error, can happen if the window in question just lacks the requested property
-			//DEBUG("Unsupported or invalid request %s: requested type %s, got <none>", prop_name, req);
-			XFree(req);
-		} else {
-			char *req = XGetAtomName(disp, xa_prop_type),
-				*got = XGetAtomName(disp, xa_ret_type);
-			ERROR("Invalid type of property %d/%s: req %s, got %s",
-					xa_prop_name, XGetAtomName(disp, xa_prop_name), req, got);
-			XFree(req);
-			XFree(got);
-		}
-		XFree(ret_prop);
-		return NULL;
-	}
+    if (xa_ret_type != xa_prop_type) {
+        if (xa_ret_type == None) {
+            // avoid crash on XGetAtomName(None)
+            char *req = XGetAtomName(disp, xa_prop_type);
+            //not necessarily an error, can happen if the window in question just lacks the requested property
+            //DEBUG("Unsupported or invalid request %s: requested type %s, got <none>", prop_name, req);
+            XFree(req);
+        } else {
+            char *req = XGetAtomName(disp, xa_prop_type),
+                *got = XGetAtomName(disp, xa_ret_type);
+            ERROR("Invalid type of property %d/%s: req %s, got %s",
+                    xa_prop_name, XGetAtomName(disp, xa_prop_name), req, got);
+            XFree(req);
+            XFree(got);
+        }
+        XFree(ret_prop);
+        return NULL;
+    }
 
-	if (out_count != NULL) {
-		*out_count = ret_nitems;
-	}
-	return ret_prop;
+    if (out_count != NULL) {
+        *out_count = ret_nitems;
+    }
+    return ret_prop;
 }
 
 void x11_util::free_property(void* prop) {
-	XFree(prop);
+    XFree(prop);
 }

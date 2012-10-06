@@ -21,32 +21,32 @@
 #include <stdarg.h>
 
 namespace config {
-	FILE *fout = stdout, *ferr = stderr;
-	bool debug_enabled = false;
+    FILE *fout = stdout, *ferr = stderr;
+    bool debug_enabled = false;
 
-	void _debug(const char* format, ...) {
-		if (debug_enabled) {
-			va_list args;
-			va_start(args, format);
-			vfprintf(fout, format, args);
-			va_end(args);
-			fprintf(fout, "\n");
-		}
-	}
+    void _debug(const char* format, ...) {
+        if (debug_enabled) {
+            va_list args;
+            va_start(args, format);
+            vfprintf(fout, format, args);
+            va_end(args);
+            fprintf(fout, "\n");
+        }
+    }
 
-	void _log(const char* format, ...) {
-		va_list args;
-		va_start(args, format);
-		vfprintf(fout, format, args);
-		va_end(args);
-		fprintf(fout, "\n");
-	}
+    void _log(const char* format, ...) {
+        va_list args;
+        va_start(args, format);
+        vfprintf(fout, format, args);
+        va_end(args);
+        fprintf(fout, "\n");
+    }
 
-	void _error(const char* format, ...) {
-		va_list args;
-		va_start(args, format);
-		vfprintf(ferr, format, args);
-		va_end(args);
-		fprintf(ferr, "\n");
-	}
+    void _error(const char* format, ...) {
+        va_list args;
+        va_start(args, format);
+        vfprintf(ferr, format, args);
+        va_end(args);
+        fprintf(ferr, "\n");
+    }
 }

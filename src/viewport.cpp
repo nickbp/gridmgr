@@ -28,52 +28,52 @@
 #endif
 
 namespace {
-	bool get_all(const Dimensions& activewin,
-			dim_list_t& viewports, size_t& active) {
-		Display* disp = XOpenDisplay(NULL);
-		if (disp == NULL) {
-			ERROR_DIR("unable to get display");
-			return false;
-		}
+    bool get_all(const Dimensions& activewin,
+            dim_list_t& viewports, size_t& active) {
+        Display* disp = XOpenDisplay(NULL);
+        if (disp == NULL) {
+            ERROR_DIR("unable to get display");
+            return false;
+        }
 
 #ifdef USE_XINERAMA
-		//try xinerama, fall back to ewmh if xinerama is unavailable
-		bool ok = viewport::xinerama::get_viewports(disp, activewin, viewports, active) ||
-			viewport::ewmh::get_viewports(disp, activewin, viewports, active);
+        //try xinerama, fall back to ewmh if xinerama is unavailable
+        bool ok = viewport::xinerama::get_viewports(disp, activewin, viewports, active) ||
+            viewport::ewmh::get_viewports(disp, activewin, viewports, active);
 #else
-		//xinerama disabled; just do ewmh
-		bool ok = viewport::ewmh::get_viewports(disp, activewin, viewports, active);
+        //xinerama disabled; just do ewmh
+        bool ok = viewport::ewmh::get_viewports(disp, activewin, viewports, active);
 #endif
 
-		if (config::debug_enabled) {
-			for (size_t i = 0; i < viewports.size(); ++i) {
-				const Dimensions& v = viewports[i];
-				DEBUG("viewport %lu: %dx %dy %luw %luh",
-						i, v.x, v.y, v.width, v.height);
-			}
-		}
+        if (config::debug_enabled) {
+            for (size_t i = 0; i < viewports.size(); ++i) {
+                const Dimensions& v = viewports[i];
+                DEBUG("viewport %lu: %dx %dy %luw %luh",
+                        i, v.x, v.y, v.width, v.height);
+            }
+        }
 
-		XCloseDisplay(disp);
-		return ok;
-	}
+        XCloseDisplay(disp);
+        return ok;
+    }
 }
 
 bool ViewportCalc::Viewports(grid::POS monitor,
-		Dimensions& cur_viewport, Dimensions& next_viewport) const {
-	dim_list_t viewports;
-	size_t active, neighbor;
-	if (!get_all(activewin, viewports, active)) {
-		return false;
-	}
+        Dimensions& cur_viewport, Dimensions& next_viewport) const {
+    dim_list_t viewports;
+    size_t active, neighbor;
+    if (!get_all(activewin, viewports, active)) {
+        return false;
+    }
 
-	neighbor::select(monitor, viewports, active, neighbor);
+    neighbor::select(monitor, viewports, active, neighbor);
 
-	cur_viewport = viewports[active];
-	next_viewport = viewports[neighbor];
+    cur_viewport = viewports[active];
+    next_viewport = viewports[neighbor];
 
-	DEBUG("cur viewport: %dx %dy %dw %dh",
-			cur_viewport.x, cur_viewport.y, cur_viewport.width, cur_viewport.height);
-	DEBUG("next viewport: %dx %dy %dw %dh",
-			next_viewport.x, next_viewport.y, next_viewport.width, next_viewport.height);
-	return true;
+    DEBUG("cur viewport: %dx %dy %dw %dh",
+            cur_viewport.x, cur_viewport.y, cur_viewport.width, cur_viewport.height);
+    DEBUG("next viewport: %dx %dy %dw %dh",
+            next_viewport.x, next_viewport.y, next_viewport.width, next_viewport.height);
+    return true;
 }
