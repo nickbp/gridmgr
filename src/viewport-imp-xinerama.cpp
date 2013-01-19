@@ -41,7 +41,7 @@ namespace {
         int screen_count = 0;
         XineramaScreenInfo* screens = XineramaQueryScreens(disp, &screen_count);
         if (screens == NULL || screen_count == 0) {
-            DEBUG_DIR("xinerama not loaded or unavailable");
+            DEBUG("xinerama not loaded or unavailable");
             if (screens != NULL) {
                 XFree(screens);
             }
@@ -124,7 +124,7 @@ namespace {
         static Atom clientlist_msg = XInternAtom(disp, "_NET_CLIENT_LIST", False);
         if (!(clients = (Window*)x11_util::get_property(disp, DefaultRootWindow(disp),
                                 XA_WINDOW, clientlist_msg, &client_count))) {
-            ERROR_DIR("unable to retrieve list of clients");
+            ERROR("unable to retrieve list of clients");
             return false;
         }
         for (size_t i = 0; i < client_count; ++i) {
@@ -137,7 +137,7 @@ namespace {
                 continue;
             }
             if (xstrut_count != 12) {//nice to have
-                ERROR_DIR("incorrect number of strut values: got %lu, expected 12", xstrut_count);
+                ERROR("incorrect number of strut values: got %lu, expected 12", xstrut_count);
                 x11_util::free_property(clients);
                 x11_util::free_property(xstrut);
                 return false;

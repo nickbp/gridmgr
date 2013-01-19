@@ -21,30 +21,14 @@
 
 #include <stdio.h>
 
-#define _PRINT_PREFIX "%s %s  "
-#define _PRINT_ARGS __FUNCTION__
-
 /* Some simple print helpers */
 
-/* Format str and file/line prefix */
-#define DEBUG(format, ...) config::_debug(_PRINT_PREFIX format, "DEBUG", _PRINT_ARGS, __VA_ARGS__)
-#define LOG(format, ...) config::_log(_PRINT_PREFIX format, "LOG", _PRINT_ARGS, __VA_ARGS__)
-#define ERROR(format, ...) config::_error(_PRINT_PREFIX format, "ERR", _PRINT_ARGS, __VA_ARGS__)
+#define DEBUG(...) config::_debug(__FUNCTION__, __VA_ARGS__)
+#define LOG(...) config::_log(__FUNCTION__, __VA_ARGS__)
+#define ERROR(...) config::_error(__FUNCTION__, __VA_ARGS__)
 
-/* No file/line prefix ("RAW") */
-#define DEBUG_RAW(format, ...) config::_debug(format, __VA_ARGS__)
-#define LOG_RAW(format, ...) config::_log(format, __VA_ARGS__)
-#define ERROR_RAW(format, ...) config::_error(format, __VA_ARGS__)
-
-/* No format str ("Direct" -> "DIR") */
-#define DEBUG_DIR(...) config::_debug(_PRINT_PREFIX "%s", "DEBUG", _PRINT_ARGS, __VA_ARGS__)
-#define LOG_DIR(...) config::_log(_PRINT_PREFIX "%s", "LOG", _PRINT_ARGS, __VA_ARGS__)
-#define ERROR_DIR(...) config::_error(_PRINT_PREFIX "%s", "ERR", _PRINT_ARGS, __VA_ARGS__)
-
-/* No format str and no file/line prefix */
-#define DEBUG_RAWDIR(...) config::_debug(__VA_ARGS__)
-#define LOG_RAWDIR(...) config::_log(__VA_ARGS__)
-#define ERROR_RAWDIR(...) config::_error(__VA_ARGS__)
+/* Skips "ERR" and func name in output. Used by help output. */
+#define PRINT_HELP(...) config::_error(NULL, __VA_ARGS__)
 
 #cmakedefine USE_XINERAMA
 
@@ -57,16 +41,21 @@ namespace config {
     static const char VERSION_STRING[] = "@gridmgr_VERSION_MAJOR@.@gridmgr_VERSION_MINOR@.@gridmgr_VERSION_PATCH@";
     static const char BUILD_DATE[] = __TIMESTAMP__;
 
-    /* DONT USE THESE, use DEBUG()/LOG()/ERROR() instead: */
-
     extern FILE *fout;
     extern FILE *ferr;
 
     extern bool debug_enabled;
-    void _debug(const char* format, ...);
 
-    void _log(const char* format, ...);
-    void _error(const char* format, ...);
+    /* DONT USE THESE DIRECTLY, use DEBUG()/LOG()/ERROR() instead.
+     * The ones with a 'format' function support printf-style format before a list of args.
+     * The ones without are for direct unformatted output (eg "_error("func", "printme");") */
+    void _debug(const char* func, const char* format, ...);
+    void _debug(const char* func, ...);
+
+    void _log(const char* func, const char* format, ...);
+    void _log(const char* func, ...);
+    void _error(const char* func, const char* format, ...);
+    void _error(const char* func, ...);
 }
 
 #endif

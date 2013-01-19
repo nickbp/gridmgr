@@ -29,7 +29,7 @@ bool viewport::ewmh::get_viewports(Display* disp, const Dimensions& /*activewin*
         static Atom curdesk_msg = XInternAtom(disp, "_NET_CURRENT_DESKTOP", False);
         if (!(cur_ptr = (unsigned long *)x11_util::get_property(disp, DefaultRootWindow(disp),
                                 XA_CARDINAL, curdesk_msg, NULL))) {
-            ERROR_DIR("unable to retrieve current desktop");
+            ERROR("unable to retrieve current desktop");
             return false;
         }
         cur_workspace = *cur_ptr;
@@ -41,11 +41,11 @@ bool viewport::ewmh::get_viewports(Display* disp, const Dimensions& /*activewin*
     static Atom workarea_msg = XInternAtom(disp, "_NET_WORKAREA", False);
     if (!(area = (unsigned long*)x11_util::get_property(disp, DefaultRootWindow(disp),
                             XA_CARDINAL, workarea_msg, &area_count))) {
-        ERROR_DIR("unable to retrieve spanning workarea");
+        ERROR("unable to retrieve spanning workarea");
         return false;
     }
     if (area_count == 0) {
-        ERROR_DIR("unable to retrieve spanning workarea.");
+        ERROR("unable to retrieve spanning workarea.");
         x11_util::free_property(area);
         return false;
     }

@@ -61,7 +61,7 @@ namespace {
         unsigned int width, height, border, depth;
         if (XGetGeometry(disp, win, &root, &x, &y, &width,
                         &height, &border, &depth) == 0) {
-            ERROR_DIR("get geometry failed");
+            ERROR("get geometry failed");
             return;
         }
         DEBUG("  %dx %dy %uw %uh %ub", x, y, width, height, border);
@@ -72,7 +72,7 @@ namespace {
         Window* ret = (Window*)x11_util::get_property(disp, DefaultRootWindow(disp),
                 XA_WINDOW, actwin_msg, NULL);
         if (ret == NULL) {
-            ERROR_DIR("unable to get active window");
+            ERROR("unable to get active window");
         }
         return ret;
     }
@@ -85,7 +85,7 @@ namespace {
         static Atom wintype_msg = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
         Atom* types = (Atom*)x11_util::get_property(disp, win, XA_ATOM, wintype_msg, &count);
         if (types == NULL) {
-            ERROR_DIR("couldn't get window types");
+            ERROR("couldn't get window types");
             //assume window types are fine, keep going
         } else {
             static Atom desktop_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DESKTOP", False),
@@ -113,7 +113,7 @@ namespace {
         static Atom state_msg = XInternAtom(disp, "_NET_WM_STATE", False);
         Atom* states = (Atom*)x11_util::get_property(disp, win, XA_ATOM, state_msg, &count);
         if (states == NULL) {
-            ERROR_DIR("couldn't get window states");
+            ERROR("couldn't get window states");
             //assume window states are fine, keep going
         } else {
             static Atom skip_pager = XInternAtom(disp, "_NET_WM_STATE_SKIP_PAGER", False),
@@ -146,13 +146,13 @@ namespace {
             unsigned int border, depth;
             if (XGetGeometry(disp, win, &root, &x, &y, &internal_width,
                             &internal_height, &border, &depth) == 0) {
-                ERROR_DIR("get geometry failed");
+                ERROR("get geometry failed");
                 return false;
             }
         }
 
         if (win == root) {
-            ERROR_DIR("this window is root! treating this as an error.");
+            ERROR("this window is root! treating this as an error.");
             return false;
         }
 
@@ -168,7 +168,7 @@ namespace {
                 just_before_root = parent;
                 if (XQueryTree(disp, just_before_root, &root,
                                 &parent, &children, &children_count) == 0) {
-                    ERROR_DIR("get query tree failed");
+                    ERROR("get query tree failed");
                     return false;
                 }
                 if (children != NULL) {
@@ -186,7 +186,7 @@ namespace {
             unsigned int border, depth;
             if (XGetGeometry(disp, just_before_root, &root, &x, &y, &external_width,
                             &external_height, &border, &depth) == 0) {
-                ERROR_DIR("get geometry failed");
+                ERROR("get geometry failed");
                 return false;
             }
         }
@@ -217,7 +217,7 @@ namespace {
         static Atom active_msg = XInternAtom(disp, "_NET_ACTIVE_WINDOW", False);
         if (!_client_msg(disp, newactive, active_msg,
                         SOURCE_INDICATION, CurrentTime, curactive, 0, 0)) {
-            ERROR_DIR("couldn't activate");
+            ERROR("couldn't activate");
             return false;
         }
         return true;
@@ -246,7 +246,7 @@ namespace {
 bool window::select_activate(grid::POS dir) {
     Display* disp = XOpenDisplay(NULL);
     if (disp == NULL) {
-        ERROR_DIR("unable to get display");
+        ERROR("unable to get display");
         return false;
     }
 
@@ -258,7 +258,7 @@ bool window::select_activate(grid::POS dir) {
         Window* all_wins = (Window*)x11_util::get_property(disp, DefaultRootWindow(disp),
                 XA_WINDOW, clientlist_msg, &win_count);
         if (all_wins == NULL || win_count == 0) {
-            ERROR_DIR("unable to get list of windows");
+            ERROR("unable to get list of windows");
             if (all_wins != NULL) {
                 x11_util::free_property(all_wins);
             }
@@ -285,7 +285,7 @@ bool window::select_activate(grid::POS dir) {
         for (size_t i = 0; i < wins.size(); ++i) {
             if (wins[i] == *active) {
                 active_window = i;
-                DEBUG_DIR("ACTIVE:");
+                DEBUG("ACTIVE:");
             }
             all_windows.push_back(Dimensions());
             get_window_size(disp, wins[i], &all_windows.back(), NULL, NULL);
@@ -315,7 +315,7 @@ bool ActiveWindow::init() {
     if (disp == NULL) {
         disp = XOpenDisplay(NULL);
         if (disp == NULL) {
-            ERROR_DIR("unable to get display");
+            ERROR("unable to get display");
             return false;
         }
     }
@@ -335,12 +335,12 @@ bool ActiveWindow::Size(Dimensions& activewin) {
     }
 
     if (is_dock_window(disp, *win) || is_menu_window(disp, *win)) {
-        LOG_DIR("Active window is a desktop or dock. Ignoring move request.");
+        LOG("Active window is a desktop or dock. Ignoring move request.");
         return false;
     }
 
     if (!get_window_size(disp, *win, &activewin, NULL, NULL)) {
-        ERROR_DIR("couldn't get window size");
+        ERROR("couldn't get window size");
         return false;
     }
 
@@ -362,7 +362,7 @@ bool ActiveWindow::MoveResize(const Dimensions& activewin) {
 
     //demaximize the window before attempting to move it
     if (!maximize_window(disp, *win, false)) {
-        ERROR_DIR("couldn't demaximize");
+        ERROR("couldn't demaximize");
         //disregard failure
     }
 
@@ -390,7 +390,7 @@ bool ActiveWindow::Maximize() {
     }
 
     if (!maximize_window(disp, *win, true)) {
-        ERROR_DIR("couldn't maximize");
+        ERROR("couldn't maximize");
         return false;
     }
     return true;
@@ -402,7 +402,7 @@ bool ActiveWindow::DeFullscreen() {
 
     static Atom fs = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
     if (!set_window_state(disp, *win, fs, 0, false)) {
-        ERROR_DIR("couldn't defullscreen");
+        ERROR("couldn't defullscreen");
         return false;
     }
     return true;
@@ -414,7 +414,7 @@ bool ActiveWindow::DeShade() {
 
     static Atom shade = XInternAtom(disp, "_NET_WM_STATE_SHADED", False);
     if (!set_window_state(disp, *win, shade, 0, false)) {
-        ERROR_DIR("couldn't deshade");
+        ERROR("couldn't deshade");
         return false;
     }
     return true;

@@ -28,58 +28,58 @@
 #define TIMESTR_MAX 128 // arbitrarily large
 
 static void syntax(char* appname) {
-    ERROR_RAWDIR("");
-    ERROR_RAWDIR("gridmgr v%s (built %s)",
+    PRINT_HELP("");
+    PRINT_HELP("gridmgr v%s (built %s)",
           config::VERSION_STRING,
           config::BUILD_DATE);
-    ERROR_RAWDIR("");
-    ERROR_RAWDIR("Performs one or more of the following, in this order:");
-    ERROR_RAWDIR("- Activate a window adjacent to the current window.");
+    PRINT_HELP("");
+    PRINT_HELP("Performs one or more of the following, in this order:");
+    PRINT_HELP("- Activate a window adjacent to the current window.");
 #ifdef USE_XINERAMA
-    ERROR_RAWDIR("- Move active window to an adjacent monitor.");
+    PRINT_HELP("- Move active window to an adjacent monitor.");
 #endif
-    ERROR_RAWDIR("- Position active window on a grid layout.");
-    ERROR_RAWDIR("");
+    PRINT_HELP("- Position active window on a grid layout.");
+    PRINT_HELP("");
 #ifdef USE_XINERAMA
-    ERROR_RAWDIR("Usage: %s [options] <window/monitor/position> [w/m/p] [w/m/p]", appname);
+    PRINT_HELP("Usage: %s [options] <window/monitor/position> [w/m/p] [w/m/p]", appname);
 #else
-    ERROR_RAWDIR("Usage: %s [options] <window/position> [w/p] [w/p]", appname);
+    PRINT_HELP("Usage: %s [options] <window/position> [w/p] [w/p]", appname);
 #endif
-    ERROR_RAWDIR("");
-    ERROR_RAWDIR("Windows (activate adjacent (w)indow):");
-    ERROR_RAWDIR("  -------- --------- ---------  ");
-    ERROR_RAWDIR(" | wuleft |   wup   | wuright | ");
-    ERROR_RAWDIR(" |------- + ------- + --------| ");
-    ERROR_RAWDIR(" | wleft  |         |  wright | ");
-    ERROR_RAWDIR(" |------- + ------- + --------| ");
-    ERROR_RAWDIR(" | wdleft |  wdown  | wdright | ");
-    ERROR_RAWDIR("  -------- --------- ---------  ");
+    PRINT_HELP("");
+    PRINT_HELP("Windows (activate adjacent (w)indow):");
+    PRINT_HELP("  -------- --------- ---------  ");
+    PRINT_HELP(" | wuleft |   wup   | wuright | ");
+    PRINT_HELP(" |------- + ------- + --------| ");
+    PRINT_HELP(" | wleft  |         |  wright | ");
+    PRINT_HELP(" |------- + ------- + --------| ");
+    PRINT_HELP(" | wdleft |  wdown  | wdright | ");
+    PRINT_HELP("  -------- --------- ---------  ");
 #ifdef USE_XINERAMA
-    ERROR_RAWDIR("");
-    ERROR_RAWDIR("Monitors (move window to adjacent (m)onitor):");
-    ERROR_RAWDIR("  -------- --------- ---------  ");
-    ERROR_RAWDIR(" | muleft |   mup   | muright | ");
-    ERROR_RAWDIR(" |------- + ------- + --------| ");
-    ERROR_RAWDIR(" | mleft  |         |  mright | ");
-    ERROR_RAWDIR(" |------- + ------- + --------| ");
-    ERROR_RAWDIR(" | mdleft |  mdown  | mdright | ");
-    ERROR_RAWDIR("  -------- --------- ---------  ");
+    PRINT_HELP("");
+    PRINT_HELP("Monitors (move window to adjacent (m)onitor):");
+    PRINT_HELP("  -------- --------- ---------  ");
+    PRINT_HELP(" | muleft |   mup   | muright | ");
+    PRINT_HELP(" |------- + ------- + --------| ");
+    PRINT_HELP(" | mleft  |         |  mright | ");
+    PRINT_HELP(" |------- + ------- + --------| ");
+    PRINT_HELP(" | mdleft |  mdown  | mdright | ");
+    PRINT_HELP("  -------- --------- ---------  ");
 #endif
-    ERROR_RAWDIR("");
-    ERROR_RAWDIR("Positions (position window on (g)rid):");
-    ERROR_RAWDIR("  -------- --------- ---------  ");
-    ERROR_RAWDIR(" | guleft |   gup   | guright | ");
-    ERROR_RAWDIR(" |------- + ------- + --------| ");
-    ERROR_RAWDIR(" | gleft  | gcenter |  gright | ");
-    ERROR_RAWDIR(" |------- + ------- + --------| ");
-    ERROR_RAWDIR(" | gdleft |  gdown  | gdright | ");
-    ERROR_RAWDIR("  -------- --------- ---------  ");
-    ERROR_RAWDIR("");
-    ERROR_RAWDIR("Options:");
-    ERROR_RAWDIR("  -h/--help        This help text.");
-    ERROR_RAWDIR("  -v/--verbose     Show verbose output.");
-    ERROR_RAWDIR("  --log <file>     Append any output to <file>.");
-    ERROR_RAWDIR("");
+    PRINT_HELP("");
+    PRINT_HELP("Positions (position window on (g)rid):");
+    PRINT_HELP("  -------- --------- ---------  ");
+    PRINT_HELP(" | guleft |   gup   | guright | ");
+    PRINT_HELP(" |------- + ------- + --------| ");
+    PRINT_HELP(" | gleft  | gcenter |  gright | ");
+    PRINT_HELP(" |------- + ------- + --------| ");
+    PRINT_HELP(" | gdleft |  gdown  | gdright | ");
+    PRINT_HELP("  -------- --------- ---------  ");
+    PRINT_HELP("");
+    PRINT_HELP("Options:");
+    PRINT_HELP("  -h/--help        This help text.");
+    PRINT_HELP("  -v/--verbose     Show verbose output.");
+    PRINT_HELP("  --log <file>     Append any output to <file>.");
+    PRINT_HELP("");
 }
 
 static bool strsub_to_pos(const char* arg, grid::POS& out, bool center_is_valid) {
@@ -197,7 +197,7 @@ static bool parse_config(int argc, char* argv[]) {
                     struct tm now_tm;
                     localtime_r(&now, &now_tm);
                     if (strftime(now_s, TIMESTR_MAX, "%a, %d %b %Y %T %z", &now_tm) == 0) {
-                        ERROR_DIR("strftime failed");
+                        ERROR("strftime failed");
                         return false;
                     }
                 }

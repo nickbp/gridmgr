@@ -32,7 +32,7 @@ namespace {
             dim_list_t& viewports, size_t& active) {
         Display* disp = XOpenDisplay(NULL);
         if (disp == NULL) {
-            ERROR_DIR("unable to get display");
+            ERROR("unable to get display");
             return false;
         }
 
