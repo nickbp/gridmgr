@@ -192,7 +192,7 @@ namespace {
             case strut::RIGHT:
                 if (INTERSECTION(screen.y, screen_max_y, iter->min, iter->max) != 0) {
                     long bound_max_x = bound.x + bound.width;
-                    screen_max_x = MIN(screen_max_x, bound_max_x - iter->width);
+                    screen_max_x = MIN(screen_max_x, bound_max_x - (long)iter->width);
                 }
                 break;
             case strut::TOP:
@@ -203,7 +203,7 @@ namespace {
             case strut::BOTTOM:
                 if (INTERSECTION(screen.x, screen_max_x, iter->min, iter->max) != 0) {
                     long bound_max_y = bound.y + bound.height;
-                    screen_max_y = MIN(screen_max_y, bound_max_y - iter->width);
+                    screen_max_y = MIN(screen_max_y, bound_max_y - (long)iter->width);
                 }
                 break;
             }
