@@ -1,0 +1,22 @@
+/* From YUI v2.5.2: base-min.css and fonts-min.css */
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;} em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:square outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+body {font:13px/1.231 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}table {font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
+/*
+font-sizes are (px=%):
+10=77, 11=85, 12=93, 13=100,
+14=108, 15=116, 16=123.1, 17=131,
+18=138.5, 19=146.5, 20=153.9, 21=161.6,
+22=167, 23=174, 24=182, 25=189, 26=197
+*/
+
+ol, ul, li { margin: 0; }
+body { font-family: sans-serif; text-align: center; /*IE: centered content*/ }
+a { color: black }
+
+#container { margin: 2em auto 0 auto; width: 45em; text-align: left; }
+#titlebar { float: left; }
+#content { clear: left; float: left; margin: 0.5em 0 1em 0.5em; font-size: 93%; text-align: justify; }
+
+#content .header { margin: 1em 0 0.9em -0.5em; font-size: 116%; font-weight: bold; }
+#content .subheader { font-size: 108%; font-weight: bold; }
+#content .code { font-family: monospace; padding: 0.2em; text-align: left; background-color: #F0F0F0; }

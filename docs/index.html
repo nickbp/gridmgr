@@ -1,0 +1,59 @@
+---
+layout: default
+title: gridmgr
+---
+<p>gridmgr is a command line tool which provides keyboard-bindable commands for easy window manipulation. Commands include placement of windows into predefined grid layouts, directional selection of adjacent windows, and directional movement of windows to adjacent monitors. This is all accomplished without requiring a full-blown tiling window manager, nor any sort of background process, service, or configuration.</p>
+
+<p>With gridmgr, you gain the organizational strengths of a tiling window manager, without sacrificing the free-form flexibility that you get from a stacking window manager. Or, if you're already using a tiling window manager, it gives you some nice commands for window movement and selection.</p>
+
+<p>Its grid placement functionality behaves similarly to the "Grid" Compiz plugin, but written to use standard APIs supported by nearly all modern window managers. But don't take my word for it...</p>
+
+<p class="header">Video</p>
+
+<p align="center"><iframe src="http://player.vimeo.com/video/37074904?portrait=0" width="561" height="200" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe></p>
+
+<p>Playing around with gridmgr on a two-monitor system running Openbox.</p>
+
+<p class="header">Documentation</p>
+
+<p>The best way to learn gridmgr is by experimenting with the available commands. Just run <i>gridmgr</i> with no arguments to see what's available. Here are some commands you can try out:</p>
+
+<p class="subheader">Example Commands</p>
+
+<ul>
+<li><i>gridmgr wleft</i> - Activates the window to the left of the current window. If there's nothing to the left, wrap around and pick something from the far right.</li>
+<li><i>gridmgr mright</i> - Moves the current window one monitor to the right. If there's no monitor to the right, wrap around and pick the leftmost monitor.</li>
+<li><i>gridmgr guleft</i> - Moves the current window to the upper left quarter of the screen. Try running <i>guleft</i> repeatedly against the same window and you'll see that it adjusts the window's width.</li>
+<li><i>gridmgr gleft mup</i> - A compound action which moves the active window one monitor up, then places it on the left half of that monitor.</li>
+</ul>
+
+<p>A note about compound actions: Only one "type" of action will be performed at a time (eg <i>gridmgr mup mup</i> won't work). Also, compound actions are always executed in this order, regardless of the argument order: window selection, monitor movement, grid placement.</p>
+
+<p class="header">Installation</p>
+
+<p class="subheader">Prerequisites</p>
+
+<ul>
+<li>g++ 4.4+ or thereabouts (I've been using 4.6 myself)</li>
+<li>CMake 2.6+</li>
+<li>Xlib (libx11-dev)</li>
+<li>Optional: Xinerama (libxinerama-dev), for multi-monitor support.</li>
+</ul>
+
+<p class="subheader">Getting the Code</p>
+
+<p>Get the latest <a href="https://github.com/nickbp/gridmgr">Source Code</a> from Git.</p>
+
+<p class="code">$ git clone git://github.com/nickbp/gridmgr.git</p>
+
+<p class="subheader">Building</p>
+
+<p class="code">$ cd gridmgr <i>(where LICENCE is found)</i><br/>
+$ mkdir bin<br/>
+$ cd bin<br/>
+$ cmake ../src <i>(autodetects Xlib/Xinerama and creates Makefiles)</i><br/>
+$ make</p>
+
+<p>That should do it! The <i>gridmgr</i> executable will be found in bin/. Just run <i>gridmgr</i> with no arguments to see the available commands.</p>
+
+<p>The build can optionally be configured with standard CMake tools like "ccmake" and "cmake-gui". They can be used to enable or disable optional components, or to enable a release build by setting CMAKE_BUILD_TYPE to "Release".</p>
