@@ -1,3 +1,9 @@
+THIS PROJECT HAS MOVED TO SOURCEHUT!: https://sr.ht/~nickbp/gridmgr/
+
+I'm consolidating my personal projects in one place. As such the old GitHub repo is being archived, and work now continues on sourcehut.
+
+===
+
 Building gridmgr:
 
 1) Install libx11-dev, and optionally libxinerama-dev
